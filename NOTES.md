@@ -5,3 +5,4 @@
 - Libary: a loose term, we usually assume that its a collection of packages.
 
 [uv init package/library](https://docs.astral.sh/uv/concepts/projects/init/)
+[uv workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/)
