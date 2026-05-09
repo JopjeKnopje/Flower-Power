@@ -1,0 +1,15 @@
+[project]
+name = "flower-sim"
+version = "0.1.0"
+authors = [
+    { name = "joppe", email = "jboeve009@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+flower-sim = "flower_sim:main"
+
+[build-system]
+requires = ["uv_build>=0.11.12,<0.12.0"]
+build-backend = "uv_build"
