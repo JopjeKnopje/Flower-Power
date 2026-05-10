@@ -24,6 +24,6 @@ To install these in neovim I use [mason.nvim](https://github.com/mason-org/mason
 ## Running
 Running the flower sim
 ```bash
-uv run flower-sim
+uv run hydraulic-sim
 ```
 

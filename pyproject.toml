@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["flower-sim"]
+dependencies = ["hydraulic-sim"]
 
 [tool.uv.sources]
-flower-sim = { workspace = true}
+hydraulic-sim = { workspace = true}
 
 [tool.uv.workspace]
-members = ["flower-sim"]
+members = ["hydraulic-sim"]

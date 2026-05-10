@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 [manifest]
 members = [
     "flower-power",
-    "flower-sim",
+    "hydraulic-sim",
 ]
 
 [[package]]
@@ -13,13 +13,13 @@ name = "flower-power"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "flower-sim" },
+    { name = "hydraulic-sim" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "flower-sim", editable = "flower-sim" }]
+requires-dist = [{ name = "hydraulic-sim", editable = "hydraulic-sim" }]
 
 [[package]]
-name = "flower-sim"
+name = "hydraulic-sim"
 version = "0.1.0"
-source = { editable = "flower-sim" }
+source = { editable = "hydraulic-sim" }
