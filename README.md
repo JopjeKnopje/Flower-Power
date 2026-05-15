@@ -27,3 +27,18 @@ Running the flower sim
 uv run hydraulic-sim
 ```
 
+### Other uv commands
+Add a dependency to a package
+```bash
+uv add --package <package> <dependency-to-install>
+```
+
+
+Because we're running in a workspace, you gotta add `--all-packages` when syncing.
+```bash
+uv sync --all-packages
+```
+
+
+## Resources
+- [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
