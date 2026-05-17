@@ -2,7 +2,8 @@
 This package will take care of crowd detection
 
 
-
+> [!note]
+> This has only been tested on a GTX 1080 TI, any other CUDA <12.6 should work too I guess
 ## Issues
 
 ### GPU Problems
@@ -60,7 +61,7 @@ It this point I wanted to not deal with `uv` just yet, when I installed the pack
 pip install torch==2.11.0+cu126  --index-url https://download.pytorch.org/whl/cu126
 pip install torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu126
 pip install ultralytics
-
+```
 
 After that I slowly moved back to a `uv` setup, which now works :)
-```
+
