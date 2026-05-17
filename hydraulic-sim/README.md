@@ -1,6 +1,6 @@
 # Flower sim
-This package simulates the serial interface the flower model is gonna talk to.
-The actual hydrolic controller is going to read from a serial connection. This is a model which will help me design the responses the flower brian is gonna generate. Since we have to take into account the speed that the cylinder can move at.
+This package simulates the serial interface the flower model is going talk to.
+The actual hydraulic controller is going to read from a serial connection. This is a model which will help me design the responses the flower brain is gonna generate. Since we have to take into account the speed that the cylinder can move at.
 
 
 ## Communication spec
