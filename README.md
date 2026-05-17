@@ -42,3 +42,4 @@ uv sync --all-packages
 
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
+- [yolo - python docx](https://docs.ultralytics.com/usage/python)
