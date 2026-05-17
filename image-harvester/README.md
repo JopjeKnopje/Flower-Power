@@ -1,7 +1,11 @@
 # Image Harvester
 This package will take care of crowd detection
 
-## GPU Problems
+
+
+## Issues
+
+### GPU Problems
 When running the example code I was greeted with this message
 ```bash
 
@@ -47,13 +51,16 @@ uv add --package image-harvester torch==2.11.0+cu126 torchvision==0.26.0 torchau
 
 
 
-
 Pytorch ships with its own [CUDA runtime](https://discuss.pytorch.org/t/compatibility-between-cuda-12-6-and-pytorch/209649/2)
 
-### Installing without pakacge manager
+### Installing without package manager
+It this point I wanted to not deal with `uv` just yet, when I installed the packages with just `pip` and ran their example code. It did run, without any GPU issues.
 
 ```bash
 pip install torch==2.11.0+cu126  --index-url https://download.pytorch.org/whl/cu126
 pip install torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu126
 pip install ultralytics
+
+
+After that I slowly moved back to a `uv` setup, which now works :)
 ```

@@ -2,9 +2,7 @@ from math import dist
 import time
 
 step_freq = 100
-step_sleep_time = (1 / 100)
-
-
+step_sleep_time = 1 / 100
 
 
 def step(time: float) -> None:
@@ -23,6 +21,7 @@ def step(time: float) -> None:
 def time_millis() -> int:
     return round(time.time() * 1000)
 
+
 def main() -> None:
     time_start = time_millis()
 
@@ -33,7 +32,3 @@ def main() -> None:
         step(time_delta)
         time_zero = time_millis()
         time.sleep(step_sleep_time)
-
-
-
-
