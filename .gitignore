@@ -1,3 +1,6 @@
 *__pycache__
 .venv/
 .ruff_cache/
+
+# don't wanna commit that UNIT
+yolo26n.pt
