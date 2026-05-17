@@ -1,5 +1,5 @@
 # Flower-Power
-This repo contians alls the packages and tooling for the Flower Power project.
+This repo contians all the packages and tooling for the Flower Power project.
 
 The project currently has 2 main parts, and a 3rd for debugging and development.
 
@@ -10,33 +10,28 @@ The project currently has 2 main parts, and a 3rd for debugging and development.
 
 
 
-## Dependencies
+## Dev dependencies
 - [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods)
 - [prek](https://prek.j178.dev/installation/)
-
-## Lsp
 - [ruff](https://docs.astral.sh/ruff/editors/setup/)
 - [basedpyright](https://github.com/DetachHead/basedpyright)
 
-To install these in neovim I use [mason.nvim](https://github.com/mason-org/mason.nvim)
-
+## After cloning
+Install all the packages within the [`uv workspace`](https://docs.astral.sh/uv/concepts/projects/workspaces/)
+```bash
+uv sync --all-packages
+```
 
 ## Running
-Running the flower sim
+Running the image-harvester
 ```bash
-uv run hydraulic-sim
+uv run image-harvester
 ```
 
 ### Other uv commands
 Add a dependency to a package
 ```bash
 uv add --package <package> <dependency-to-install>
-```
-
-
-Because we're running in a workspace, you gotta add `--all-packages` when syncing.
-```bash
-uv sync --all-packages
 ```
 
 
