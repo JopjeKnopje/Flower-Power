@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 image-harvester = "image_harvester:main"
+image-harvester-test = "image_harvester_test:main"
 
 
 [tool.uv.sources]
