@@ -11,8 +11,14 @@ from cv2.typing import (
 )
 
 
+# TODO: improve the way colors are done (maybe just support hex values?)
 class Color(EnumDict):
-    WHITE: Scalar = (255,255,255)
+    WHITE: Scalar = (255, 255, 255)
+    BABY_BLUE: Scalar = (255, 150, 17)
+    LIGHT_BLUE: Scalar = (255, 255, 17)
+    RED: Scalar = (50, 50, 255)
+    BLACK: Scalar = (0, 0, 0)
+
 
 @dataclass()
 class Shape(ABC):
@@ -27,25 +33,25 @@ class Shape(ABC):
         self._color = color
 
 
-
 class Point(Shape):
     @override
     def draw(self, frame: MatLike) -> None:
         x = self.p1[0]
         y = self.p1[1]
         thickness = 5
-        _ = cv2.rectangle(frame, (x, y), (x + thickness, y + thickness), self._color, -1)
+        _ = cv2.rectangle(
+            frame, (x, y), (x + thickness, y + thickness), self._color, -1
+        )
 
 
 class Line(Shape):
     p2: Vec2i
 
-    def __init__(self, position: Vec2i, end: Vec2i, color: Scalar=Shape._color) -> None:
+    def __init__(
+        self, position: Vec2i, end: Vec2i, color: Scalar = Shape._color
+    ) -> None:
         Shape.__init__(self, position, color)
         self.p2 = end
-
-   
-
 
     @override
     def draw(self, frame: MatLike) -> None:
@@ -55,7 +61,3 @@ class Line(Shape):
         end_y = self.p2[1]
 
         _ = cv2.line(frame, (start_x, start_y), (end_x, end_y), self._color, 1)
-
-
-
-
