@@ -100,21 +100,26 @@ def main() -> None:
     frame = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), np.uint8)
     points: list[Shape] = [
         Point([100, 100]),
-        Line([5, 50], [50, 5])
+        Point([45, 120]),
+        Line([50, 100], [100, 50]),
+        Line([58, 150], [200, 50])
     ]
 
 
-    for p in points:
-        p.draw(frame)
-
-
     # TODO: Fix polymorhpism
-    l = find_line(points[0], points[1])
+    l = find_line(points[0], points[2])
+    l.set_color(0xff1111)
+    l.draw(frame)
+
+    l = find_line(points[1], points[2])
     l.set_color(0xff1111)
     l.draw(frame)
     # Line(points[0], line_intersect)
     # print(f"distance {distance}")
 
+
+    for p in points:
+        p.draw(frame)
 
 
     cv2.imshow("test", frame)
