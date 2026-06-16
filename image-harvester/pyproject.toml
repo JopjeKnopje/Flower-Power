@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "torch==2.11.0+cu126",
     "torchvision==0.26.0",
+    "pillow>=12.2.0",
     "ultralytics>=8.4.51",
 ]
 

@@ -287,6 +287,7 @@ name = "image-harvester"
 version = "0.1.0"
 source = { editable = "image-harvester" }
 dependencies = [
+    { name = "pillow" },
     { name = "torch" },
     { name = "torchvision" },
     { name = "ultralytics" },
@@ -294,6 +295,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "pillow", specifier = ">=12.2.0" },
     { name = "torch", specifier = "==2.11.0+cu126", index = "https://download.pytorch.org/whl/cu126" },
     { name = "torchvision", specifier = "==0.26.0", index = "https://download.pytorch.org/whl/cu126" },
     { name = "ultralytics", specifier = ">=8.4.51" },
