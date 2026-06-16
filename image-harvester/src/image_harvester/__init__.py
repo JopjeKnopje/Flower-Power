@@ -1,14 +1,40 @@
-from collections import defaultdict
-import random
-from typing import Self
-
 import cv2
-import numpy as np
 
 from ultralytics import YOLO
+from PIL import Image
+import numpy as np
+from dataclasses import dataclass
 
-from image_harvester_test import find_line
 from shapes import Color, Line, Point
+
+
+@dataclass
+class VideoStream:
+    _url: str
+    address: str
+    cap: cv2.VideoCapture
+
+    def __init__(self, address: str) -> None:
+        self.address = address
+        # TODO: Read credentials from env?
+        self._url = f"http://root:admin@{self.address}/mjpg/video.mjpg"
+
+    def start(self) -> None:
+        self.cap = cv2.VideoCapture(self._url)
+
+    def is_open(self) -> bool:
+        return self.cap.isOpened()
+
+
+@dataclass
+class JointViewport:
+    video_streams: list[VideoStream]
+
+    def is_open(self) -> bool:
+        for s in self.video_streams:
+            if not s.is_open():
+                return False
+        return True
 
 
 def main() -> None:
@@ -16,21 +42,43 @@ def main() -> None:
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")
 
-    # Open the video file
-    video_path = "test-vids/top-down.mp4"
-    cap = cv2.VideoCapture(video_path)
+    # TODO: Read from config
+    cams: list[VideoStream] = [
+        VideoStream("192.168.0.2"),
+        VideoStream("192.168.0.3"),
+    ]
 
-    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    for c in cams:
+        c.start()
 
-    # which is a simple line for now (we should actually use a point for this)
-    flower_location = Line(
-        [200, frame_height - 25], [frame_width - 200, frame_height - 25], 0xFFFF11
-    )
-    flower_location.set_color(Color.RED)
+    viewport = JointViewport(cams)
+
+    if not viewport.is_open():
+        print("error viewport not open")
+
+    for idx, c in enumerate(cams):
+        success, img = c.cap.read()
+        _ = cv2.imwrite(f"capture{idx}.jpg", img)
+
+    img0 = Image.open("capture0.jpg")
+    img1 = Image.open("capture1.jpg")
+
+    width = img0.size[0]
+
+    img2 = Image.new("RGB", (width * 2, img0.size[1]))
+
+    img2.paste(img0, (0, 0))
+    img2.paste(img1, (width, 0))
+
+    open_cv_image = np.array(img2)
+    open_cv_image = open_cv_image[:, :, ::-1].copy()
+
+    _ = cv2.imwrite("joint.jpg", open_cv_image)
+
+    return
 
     # Loop through the video frames
-    while cap.isOpened():
+    while viewport.is_open():
         # Read a frame from the video
         success, frame = cap.read()
 
