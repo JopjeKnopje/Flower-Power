@@ -51,7 +51,6 @@ class VideoStream:
         if self._writer is not None:
             self._writer.write(self.get_pixels())
 
-        self.cap = cv2.VideoCapture(self._uri)
         return success, self._pixel_buf
 
     def is_open(self) -> bool:
