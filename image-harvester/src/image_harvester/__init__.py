@@ -1,33 +1,24 @@
-from curses import pair_content
-from typing import overload, override
+from dataclasses import dataclass
+from typing import Self, override
 
 import cv2
-
 from cv2.typing import MatLike
 from ultralytics import YOLO
-from PIL import Image
-import numpy as np
-from dataclasses import dataclass
-
-from shapes import Color, Line, Point
 
 
-@dataclass
-class VideoSourceURI(str):
-    _uri: str
+VideoSourceURI = str
 
 
+# dirty trick hehe
 class VideoSourceWeb(VideoSourceURI):
-    def __init__(
-        self,
+    def __new__(
+        cls,
         address: str,
         path: str = "/mjpg/video.mjpg",
         username: str = "root",
         password: str = "admin",
-    ) -> None:
-        uri = f"http://{username}:{password}@{address}{path}"
-        super().__init__(uri)
-        print(f"VideoSourceWeb uri {uri}")
+    ) -> Self:
+        return super().__new__(cls, f"http://{username}:{password}@{address}{path}")
 
 
 @dataclass
@@ -42,6 +33,10 @@ class VideoStream:
     ) -> None:
         self._writer = writer
         self._uri = uri
+        self.cap = cv2.VideoCapture(self._uri)
+
+        if not self.cap.isOpened():
+            raise Exception(f"could not open URI {self._uri}")
 
     def get_pixels(self) -> MatLike:
         return self._pixel_buf
@@ -49,14 +44,15 @@ class VideoStream:
     def read(self) -> tuple[bool, MatLike]:
         success, self._pixel_buf = self.cap.read()
 
-        # debuggging used for recording vids
+        if not success:
+            raise Exception(f"failed reading {self}")
+
+        # used for recording vids while debugging
         if self._writer is not None:
             self._writer.write(self.get_pixels())
 
-        return success, self._pixel_buf
-
-    def start(self) -> None:
         self.cap = cv2.VideoCapture(self._uri)
+        return success, self._pixel_buf
 
     def is_open(self) -> bool:
         return self.cap.isOpened()
@@ -99,36 +95,19 @@ def main() -> None:
 
     # TODO: Read from config
     cams: list[VideoStream] = [
-        VideoStream("192.168.0.2"),
-        VideoStream("192.168.0.3"),
-        VideoStream("192.168.0.4"),
+        VideoStream(VideoSourceWeb("192.168.1.2")),
+        VideoStream(VideoSourceWeb("192.168.1.3")),
+        VideoStream(VideoSourceWeb("192.168.1.4")),
     ]
-
-    for c in cams:
-        c.start()
 
     viewport = JointViewport(cams)
 
     if not viewport.is_open():
         print("error viewport not open")
 
-    # TODO: Fix lsp
-    fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    frame_width = int(cams[0].cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cams[0].cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    writers: list[cv2.VideoWriter] = [
-        cv2.VideoWriter("output-2-1.avi", fourcc, 5.0, (frame_width, frame_height)),
-        cv2.VideoWriter("output-3-1.avi", fourcc, 5.0, (frame_width, frame_height)),
-        cv2.VideoWriter("output-4-1.avi", fourcc, 5.0, (frame_width, frame_height)),
-    ]
-
     # Loop through the video frames
     while viewport.is_open():
         success, frame = viewport.read()
-
-        for idx, w in enumerate(writers):
-            w.write(cams[idx].get_pixels())
 
         if success:
             # Run YOLO26 tracking on the frame, persisting tracks between frames
