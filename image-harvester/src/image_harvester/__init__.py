@@ -10,21 +10,21 @@ VideoSourceURI = str
 
 
 # dirty trick hehe
-class VideoSourceWeb(VideoSourceURI):
+class VideoSourceRTP(VideoSourceURI):
     def __new__(
         cls,
         address: str,
-        path: str = "/mjpg/video.mjpg",
+        path: str = "/axis-media/media.amp",
         username: str = "root",
         password: str = "admin",
     ) -> Self:
-        return super().__new__(cls, f"http://{username}:{password}@{address}{path}")
+        return super().__new__(cls, f"rtsp://{username}:{password}@{address}{path}")
 
 
 @dataclass
 class VideoStream:
     _uri: VideoSourceURI
-    cap: cv2.VideoCapture
+    _cap: cv2.VideoCapture
     _pixel_buf: MatLike
     _writer: cv2.VideoWriter | None
 
@@ -33,16 +33,16 @@ class VideoStream:
     ) -> None:
         self._writer = writer
         self._uri = uri
-        self.cap = cv2.VideoCapture(self._uri)
+        self._cap = cv2.VideoCapture(self._uri)
 
-        if not self.cap.isOpened():
+        if not self._cap.isOpened():
             raise Exception(f"could not open URI {self._uri}")
 
     def get_pixels(self) -> MatLike:
         return self._pixel_buf
 
     def read(self) -> tuple[bool, MatLike]:
-        success, self._pixel_buf = self.cap.read()
+        success, self._pixel_buf = self._cap.read()
 
         if not success:
             raise Exception(f"failed reading {self}")
@@ -54,7 +54,7 @@ class VideoStream:
         return success, self._pixel_buf
 
     def is_open(self) -> bool:
-        return self.cap.isOpened()
+        return self._cap.isOpened()
 
 
 @dataclass
@@ -94,15 +94,21 @@ def main() -> None:
 
     # TODO: Read from config
     cams: list[VideoStream] = [
-        VideoStream(VideoSourceWeb("192.168.1.2")),
-        VideoStream(VideoSourceWeb("192.168.1.3")),
-        VideoStream(VideoSourceWeb("192.168.1.4")),
+        VideoStream(VideoSourceRTP("192.168.1.2")),
+        VideoStream(VideoSourceRTP("192.168.1.3")),
+        VideoStream(VideoSourceRTP("192.168.1.4")),
     ]
 
     viewport = JointViewport(cams)
 
     if not viewport.is_open():
         print("error viewport not open")
+
+    h = cams[0]._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    w = cams[0]._cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+    print(w)
+    print(h)
 
     # Loop through the video frames
     while viewport.is_open():
@@ -119,8 +125,11 @@ def main() -> None:
 
                 # Visualize the result on the frame
                 frame = result.plot()
+                height, width, _ = frame.shape
+                print(f"width {width}, height {height}")
+
             # Display the annotated frame
-            cv2.imshow("YOLO26 Tracking", frame)
+            cv2.imshow("poep", frame)
 
             # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord("q"):
