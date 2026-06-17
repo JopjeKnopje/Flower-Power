@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Self, override
+import queue
+import threading
 
 import cv2
 from cv2.typing import MatLike
@@ -21,10 +23,39 @@ class VideoSourceRTP(VideoSourceURI):
         return super().__new__(cls, f"rtsp://{username}:{password}@{address}{path}")
 
 
+# bufferless VideoCapture: https://stackoverflow.com/a/54755738/7363348
+class VideoCapture:
+    def __init__(self, name):
+        self.cap = cv2.VideoCapture(name)
+        self.q = queue.Queue()
+        t = threading.Thread(target=self._reader)
+        t.daemon = True
+        t.start()
+
+    # read frames as soon as they are available, keeping only most recent one
+    def _reader(self):
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                break
+            if not self.q.empty():
+                try:
+                    self.q.get_nowait()  # discard previous (unprocessed) frame
+                except queue.Empty:
+                    pass
+            self.q.put(frame)
+
+    def read(self):
+        return self.q.get()
+    
+    def isOpened(self) -> bool:
+        return self.cap.isOpened()
+
+
 @dataclass
 class VideoStream:
     _uri: VideoSourceURI
-    _cap: cv2.VideoCapture
+    _cap: VideoCapture
     _pixel_buf: MatLike
     _writer: cv2.VideoWriter | None
 
@@ -33,7 +64,7 @@ class VideoStream:
     ) -> None:
         self._writer = writer
         self._uri = uri
-        self._cap = cv2.VideoCapture(self._uri)
+        self._cap = VideoCapture(self._uri)
 
         if not self._cap.isOpened():
             raise Exception(f"could not open URI {self._uri}")
@@ -42,7 +73,7 @@ class VideoStream:
         return self._pixel_buf
 
     def read(self) -> tuple[bool, MatLike]:
-        success, self._pixel_buf = self._cap.read()
+        success, self._pixel_buf = (True, self._cap.read())
 
         if not success:
             raise Exception(f"failed reading {self}")
@@ -88,7 +119,6 @@ class JointViewport:
 
 
 def main() -> None:
-
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")
 
@@ -103,12 +133,6 @@ def main() -> None:
 
     if not viewport.is_open():
         print("error viewport not open")
-
-    h = cams[0]._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    w = cams[0]._cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-
-    print(w)
-    print(h)
 
     # Loop through the video frames
     while viewport.is_open():
