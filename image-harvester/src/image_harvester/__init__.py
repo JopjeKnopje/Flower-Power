@@ -1,3 +1,6 @@
+from curses import pair_content
+from typing import overload, override
+
 import cv2
 
 from cv2.typing import MatLike
@@ -10,26 +13,50 @@ from shapes import Color, Line, Point
 
 
 @dataclass
+class VideoSourceURI(str):
+    _uri: str
+
+
+class VideoSourceWeb(VideoSourceURI):
+    def __init__(
+        self,
+        address: str,
+        path: str = "/mjpg/video.mjpg",
+        username: str = "root",
+        password: str = "admin",
+    ) -> None:
+        uri = f"http://{username}:{password}@{address}{path}"
+        super().__init__(uri)
+        print(f"VideoSourceWeb uri {uri}")
+
+
+@dataclass
 class VideoStream:
-    _url: str
-    address: str
+    _uri: VideoSourceURI
     cap: cv2.VideoCapture
     _pixel_buf: MatLike
+    _writer: cv2.VideoWriter | None
 
-    def __init__(self, address: str) -> None:
-        self.address = address
-        # TODO: Read credentials from env?
-        self._url = f"http://root:admin@{self.address}/mjpg/video.mjpg"
+    def __init__(
+        self, uri: VideoSourceURI, writer: cv2.VideoWriter | None = None
+    ) -> None:
+        self._writer = writer
+        self._uri = uri
 
     def get_pixels(self) -> MatLike:
         return self._pixel_buf
 
     def read(self) -> tuple[bool, MatLike]:
         success, self._pixel_buf = self.cap.read()
+
+        # debuggging used for recording vids
+        if self._writer is not None:
+            self._writer.write(self.get_pixels())
+
         return success, self._pixel_buf
 
     def start(self) -> None:
-        self.cap = cv2.VideoCapture(self._url)
+        self.cap = cv2.VideoCapture(self._uri)
 
     def is_open(self) -> bool:
         return self.cap.isOpened()
@@ -61,7 +88,6 @@ class JointViewport:
 
 
 # TODO: fix hconcat
-# TODO: add write to file mode
 # TODO: wait for all cameras in feed to come online with a set timeout
 # TODO: Check the camera resolution
 
