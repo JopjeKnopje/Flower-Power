@@ -1,13 +1,13 @@
-from dataclasses import dataclass
 import logging
-from typing import Self, override
-from queue import Queue, Empty
+from dataclasses import dataclass
+from queue import Empty, Queue
 from threading import Thread
+from typing import Self
+from math import sqrt
 
 import cv2
 from cv2.typing import MatLike
 from ultralytics import YOLO
-
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -43,8 +43,9 @@ class VideoStream:
         self._cap = cv2.VideoCapture(self._uri)
         self._q = Queue()
 
-        if self._writer is None:
-            logger.info("_writer not set, not to file")
+        if self._writer:
+            # TODO: Get VideoWriter filename
+            logger.info(f"VideoWriter attached to VideoStream{uri}")
 
         if not self._cap.isOpened():
             raise Exception(f"could not open URI {self._uri}")
@@ -100,16 +101,10 @@ class JointViewport:
         return cv2.hconcat(imgs)
 
 
-# TODO: fix hconcat
-# TODO: wait for all cameras in feed to come online with a set timeout
-# TODO: Check the camera resolution
-
-
 def main() -> None:
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")
 
-    # TODO: Read from config
     cams: list[VideoStream] = [
         VideoStream(VideoSourceRTP("192.168.1.2")),
         VideoStream(VideoSourceRTP("192.168.1.3")),
@@ -120,6 +115,7 @@ def main() -> None:
 
     viewport = JointViewport(cams)
 
+    tracked_objects: dict[int, int] = {}
     if not viewport.is_open():
         print("error viewport not open")
 
@@ -132,12 +128,23 @@ def main() -> None:
             continue
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
-        result = model.track(frame, persist=True)[0]
+        # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
+        result = model.track(frame, persist=True, classes=[0])[0]
 
         # Get the boxes and track IDs
         if result.boxes and result.boxes.is_track:
             boxes = result.boxes.xywh.cpu()
+            boxes_cls = result.boxes.cls.cpu()
             track_ids = result.boxes.id.int().cpu().tolist()
+
+            for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
+                x, y, w, h = box
+                if model.names[int(box_cls)] != "person":
+                    continue
+                object_diagonal = sqrt(w**2 + h**2)
+
+                print(f"object {track_id} size {object_diagonal}")
+                tracked_objects[track_id] = int(object_diagonal)
 
             # Visualize the result on the frame
             frame = result.plot()
@@ -151,5 +158,5 @@ def main() -> None:
             break
 
     # Release the video capture object and close the display window
-    # cap.release()
+    # TODO: Close video caps
     cv2.destroyAllWindows()
