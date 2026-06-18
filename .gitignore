@@ -2,5 +2,7 @@
 .venv/
 .ruff_cache/
 
+test-vids/
+*.avi
 # don't wanna commit that UNIT
 yolo26n.pt
