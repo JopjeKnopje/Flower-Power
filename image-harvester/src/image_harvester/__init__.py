@@ -63,7 +63,7 @@ class VideoStream:
     _uri: VideoSourceURI
     _cap: cv2.VideoCapture
     _writer: cv2.VideoWriter | None
-    _q: Queue[MatLike] = Queue()
+    _q: Queue[MatLike]
 
     def __init__(
         self, uri: VideoSourceURI, writer: cv2.VideoWriter | None = None
@@ -71,6 +71,7 @@ class VideoStream:
         self._writer = writer
         self._uri = uri
         self._cap = cv2.VideoCapture(self._uri)
+        self._q = Queue()
 
         if self._writer is None:
             logger.info("_writer not set, not to file")
@@ -79,7 +80,6 @@ class VideoStream:
             raise Exception(f"could not open URI {self._uri}")
 
         Thread(target=self._reader, daemon=True).start()
-
 
     def _reader(self) -> None:
         logger.info("started _reader thread")
@@ -100,13 +100,11 @@ class VideoStream:
                     pass
             self._q.put(frame)
 
-
     def read(self) -> MatLike:
         return self._q.get()
 
     def is_open(self) -> bool:
         return self._cap.isOpened()
-
 
 
 @dataclass
