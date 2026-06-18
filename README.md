@@ -40,3 +40,4 @@ uv add --package <package> <dependency-to-install>
 - [yolo - python docx](https://docs.ultralytics.com/usage/python)
 
 - [what are tensors](https://medium.com/@payalparida_datascientist/why-tensors-are-essential-in-ml-dl-3fdd12365bca)
+- [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)
