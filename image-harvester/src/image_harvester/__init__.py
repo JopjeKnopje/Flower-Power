@@ -104,11 +104,21 @@ class JointViewport:
 def main() -> None:
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")
 
     cams: list[VideoStream] = [
-        VideoStream(VideoSourceRTP("192.168.1.2")),
-        VideoStream(VideoSourceRTP("192.168.1.3")),
-        VideoStream(VideoSourceRTP("192.168.1.4")),
+        VideoStream(
+            VideoSourceRTP("192.168.1.2"),
+            cv2.VideoWriter("recordings/output-2.avi", fourcc, 30.0, (1280, 960)),
+        ),
+        VideoStream(
+            VideoSourceRTP("192.168.1.3"),
+            cv2.VideoWriter("recordings/output-3.avi", fourcc, 30.0, (1280, 960)),
+        ),
+        VideoStream(
+            VideoSourceRTP("192.168.1.4"),
+            cv2.VideoWriter("recordings/output-4.avi", fourcc, 30.0, (1280, 960)),
+        ),
     ]
 
     print(f"initiaized {len(cams)} cameras")
