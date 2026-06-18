@@ -1,7 +1,9 @@
+import httpx
 import logging
 from dataclasses import dataclass
 from queue import Empty, Queue
 from threading import Thread
+import time
 from typing import Self
 from math import sqrt
 
@@ -101,6 +103,25 @@ class JointViewport:
         return cv2.hconcat(imgs)
 
 
+def update_flower(objs: list[int], dt: float) -> bool:
+    if dt < 2.5:
+        return False
+    sum: float = 0
+    for o in objs:
+        sum = sum + o
+
+    sum = sum / len(objs)
+    print(f"sum {sum} dt {dt}")
+    band = int(sum / 100)
+    if band > 9:
+        band = 9
+    try:
+        _ = httpx.get(f"http://192.168.0.42/move?band={band}")
+    except Exception as e:
+        print(e)
+    return True
+
+
 def main() -> None:
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")
@@ -108,16 +129,16 @@ def main() -> None:
 
     cams: list[VideoStream] = [
         VideoStream(
-            VideoSourceRTP("192.168.1.2"),
-            cv2.VideoWriter("recordings/output-2.avi", fourcc, 30.0, (1280, 960)),
+            VideoSourceRTP("192.168.0.2"),
+            cv2.VideoWriter("recordings/output-2-1.avi", fourcc, 30.0, (1280, 960)),
         ),
         VideoStream(
-            VideoSourceRTP("192.168.1.3"),
-            cv2.VideoWriter("recordings/output-3.avi", fourcc, 30.0, (1280, 960)),
+            VideoSourceRTP("192.168.0.3"),
+            cv2.VideoWriter("recordings/output-3-1.avi", fourcc, 30.0, (1280, 960)),
         ),
         VideoStream(
-            VideoSourceRTP("192.168.1.4"),
-            cv2.VideoWriter("recordings/output-4.avi", fourcc, 30.0, (1280, 960)),
+            VideoSourceRTP("192.168.0.4"),
+            cv2.VideoWriter("recordings/output-4-1.avi", fourcc, 30.0, (1280, 960)),
         ),
     ]
 
@@ -125,9 +146,10 @@ def main() -> None:
 
     viewport = JointViewport(cams)
 
-    tracked_objects: dict[int, int] = {}
     if not viewport.is_open():
         print("error viewport not open")
+
+    time_old: float = time.time()
 
     # Loop through the video frames
     while viewport.is_open():
@@ -139,7 +161,7 @@ def main() -> None:
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        result = model.track(frame, persist=True, classes=[0])[0]
+        result = model.track(frame, persist=True, classes=[0], verbose=False)[0]
 
         # Get the boxes and track IDs
         if result.boxes and result.boxes.is_track:
@@ -147,17 +169,20 @@ def main() -> None:
             boxes_cls = result.boxes.cls.cpu()
             track_ids = result.boxes.id.int().cpu().tolist()
 
+            objects: list[int] = []
             for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
                 x, y, w, h = box
                 if model.names[int(box_cls)] != "person":
                     continue
-                object_diagonal = sqrt(w**2 + h**2)
-
-                print(f"object {track_id} size {object_diagonal}")
-                tracked_objects[track_id] = int(object_diagonal)
+                object_diagonal = int(sqrt(w**2 + h**2))
+                objects.append(object_diagonal)
 
             # Visualize the result on the frame
             frame = result.plot()
+
+            if update_flower(objects, time.time() - time_old):
+                time_old = time.time()
+
         height, width, _ = frame.shape
 
         # Display the annotated frame
