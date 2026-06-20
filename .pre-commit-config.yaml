@@ -1,3 +1,4 @@
+exclude: "image-harvester/src/image_harvester_test"
 repos:
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
