@@ -35,6 +35,21 @@ uv add --package <package> <dependency-to-install>
 ```
 
 
+### Camera setup
+The camera's are running on `192.168.0.X/24`. They are marked with their number representing their `X` value.
+They are looking for a gateway at `192.168.0.1`, in order to reach the camera's we can set our machine's address to that.
+#### Reaching the cameras
+Under linux you can add multiple addresses to your network interface.
+```bash
+# sudo ip addr add 192.168.0.1/24 dev <dev>
+# in my case:
+sudo ip addr add 192.168.0.1/24 dev enp42s0
+```
+
+You should now be able to reach the camera (and any other devices on the network)
+
+
+
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
 - [yolo - python docx](https://docs.ultralytics.com/usage/python)
