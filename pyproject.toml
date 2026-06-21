@@ -23,9 +23,8 @@ dev = [
 ]
 
 [project.scripts]
-image-harvester = "image_harvester:main"
-image-harvester-reachable = "image_harvester:main"
-image-harvester-test = "image_harvester_test:main"
+image-harvester = "image_harvester:harvester"
+image-harvester-ping = "image_harvester:cli_ping"
 
 
 [tool.uv.build-backend]
