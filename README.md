@@ -56,3 +56,4 @@ You should now be able to reach the camera (and any other devices on the network
 
 - [what are tensors](https://medium.com/@payalparida_datascientist/why-tensors-are-essential-in-ml-dl-3fdd12365bca)
 - [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)
+- [uv project structure](https://stackoverflow.com/a/79817200/7363348)
