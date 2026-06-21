@@ -53,7 +53,10 @@ You should now be able to reach the camera (and any other devices on the network
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
 - [yolo - python docx](https://docs.ultralytics.com/usage/python)
-
 - [what are tensors](https://medium.com/@payalparida_datascientist/why-tensors-are-essential-in-ml-dl-3fdd12365bca)
-- [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)
 - [uv project structure](https://stackoverflow.com/a/79817200/7363348)
+- [python logging cookbook](https://docs.python.org/3/howto/logging-cookbook.html)
+
+## Credits
+- [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)
+- [colored logging python](https://stackoverflow.com/a/56944256/7363348)

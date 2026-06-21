@@ -18,7 +18,7 @@ def config_data() -> str:
     recordings_output_dir = "test-recordings"
 
     [[cameras]]
-    uri = "192.1"
+    uri = "192.168.0.4"
     panorama_location = 1
     rstp_path = "/axis-media/media.amp"
     username = "root"
@@ -26,7 +26,7 @@ def config_data() -> str:
 
 
     [[cameras]]
-    uri = "192.1"
+    uri = "192.168.0.200"
     panorama_location = 2
     rstp_path = "/axis-media/media.amp"
     username = "root"
@@ -45,6 +45,8 @@ def test_read_data(config_data: str) -> None:
 
     assert c.cameras[0].username == "root"
     assert c.cameras[0].password == "admin"
+
+    assert str(c.cameras[0].uri) == "192.168.0.4"
 
 
 def test_read_file_not_found(monkeypatch: MonkeyPatch) -> None:

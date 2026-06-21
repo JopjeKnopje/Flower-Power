@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 from queue import Empty, Queue
 from threading import Thread
@@ -9,8 +8,10 @@ import cv2
 from cv2.typing import MatLike
 from ultralytics import YOLO
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+from image_harvester.logger import logger_init
+
+logger = logger_init()
+
 
 VideoSourceURI = str
 

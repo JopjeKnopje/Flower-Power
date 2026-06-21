@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from ipaddress import AddressValueError, IPv4Address
 import os
 from pathlib import Path
 import pathlib
@@ -6,19 +7,27 @@ from typing import Self
 import msgspec
 
 
-FLOWER_CONFIG_PATH = "image-harvester.toml1"
+FLOWER_CONFIG_PATH = "image-harvester.toml"
 
 
+# TODO: Think about video recording location
 @dataclass
 class Camera:
-    # TODO: Use `Path | IPv4Address` types for this
-    uri: str
     # used for stitching together the resulting image
+    uri: str
     panorama_location: int
 
     rstp_path: str | None
     username: str | None
     password: str | None
+    # TODO: Use `Path | IPv4Address` types for this
+
+    # dirty trick, we just parse at runtime
+    def get_uri(self) -> Path | IPv4Address:
+        try:
+            return IPv4Address(self.uri)
+        except AddressValueError:
+            return pathlib.Path(self.uri)
 
 
 def dec_hook(type: type[Path], obj: str) -> Path:
