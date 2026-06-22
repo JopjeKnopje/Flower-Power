@@ -17,7 +17,7 @@ logger = logger_init()
 
 
 class VideoSource(str):
-    # what is this return type?
+    # TODO: what should this return type be?
     def __new__(cls, c: Camera):
         uri = c.get_uri()
         if isinstance(uri, IPv4Address):
@@ -28,7 +28,7 @@ class VideoSource(str):
 class VideoSourceURI(VideoSource):
     def __new__(cls, path: str | pathlib.Path) -> Self:
         if isinstance(path, pathlib.Path):
-            path = path.as_uri()
+            path = path.resolve().as_posix()
         return str.__new__(cls, path)
 
 

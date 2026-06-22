@@ -15,6 +15,7 @@ FLOWER_CONFIG_PATH = "image-harvester.toml"
 class Camera:
     # TODO: Use `Path | IPv4Address` types for this
     uri: str
+
     # used for stitching together the resulting image
     panorama_location: int
 
@@ -22,6 +23,7 @@ class Camera:
     username: str = "root"
     password: str = "admin"
 
+    #
     # dirty trick, we just parse at runtime
     def get_uri(self) -> Path | IPv4Address:
         try:
