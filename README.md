@@ -56,6 +56,7 @@ You should now be able to reach the camera (and any other devices on the network
 - [what are tensors](https://medium.com/@payalparida_datascientist/why-tensors-are-essential-in-ml-dl-3fdd12365bca)
 - [uv project structure](https://stackoverflow.com/a/79817200/7363348)
 - [python logging cookbook](https://docs.python.org/3/howto/logging-cookbook.html)
+- [python forward declaration __future__](https://stackoverflow.com/a/55344418/7363348)
 
 ## Credits
 - [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)

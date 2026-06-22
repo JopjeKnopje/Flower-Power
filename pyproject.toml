@@ -23,8 +23,8 @@ dev = [
 ]
 
 [project.scripts]
-image-harvester = "image_harvester:harvester"
-image-harvester-ping = "image_harvester:cli_ping"
+ih = "image_harvester:harvester"
+ping-test = "image_harvester:ping"
 
 
 [tool.uv.build-backend]

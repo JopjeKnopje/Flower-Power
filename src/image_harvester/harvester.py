@@ -1,23 +1,34 @@
+# NOTE: Update to python 3.14 to not need this
+from __future__ import annotations
+
 from dataclasses import dataclass
+from ipaddress import IPv4Address
 from queue import Empty, Queue
 from threading import Thread
 from typing import Self
 from math import sqrt
 
+
 import cv2
 from cv2.typing import MatLike
 from ultralytics import YOLO
 
+from image_harvester.config import Camera
 from image_harvester.logger import logger_init
 
 logger = logger_init()
 
 
-VideoSourceURI = str
+class VideoSource(str):
+    def __new__(cls, c: Camera) -> VideoSource:
+        uri = c.get_uri()
+        if isinstance(uri, IPv4Address):
+            return VideoSourceRTP(uri, c.rstp_path, c.username, c.password)
+        return VideoSourceURI(uri)
 
 
 # dirty trick hehe
-class VideoSourceRTP(VideoSourceURI):
+class VideoSourceRTP(VideoSource):
     def __new__(
         cls,
         address: str,
@@ -31,13 +42,13 @@ class VideoSourceRTP(VideoSourceURI):
 # bufferless VideoCapture: https://stackoverflow.com/a/54755738/7363348
 @dataclass
 class VideoStream:
-    _uri: VideoSourceURI
+    _uri: VideoSource
     _cap: cv2.VideoCapture
     _writer: cv2.VideoWriter | None
     _q: Queue[MatLike]
 
     def __init__(
-        self, uri: VideoSourceURI, writer: cv2.VideoWriter | None = None
+        self, uri: VideoSource, writer: cv2.VideoWriter | None = None
     ) -> None:
         self._writer = writer
         self._uri = uri
@@ -107,24 +118,16 @@ def harvester() -> None:
     model = YOLO("yolo26n.pt")
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
 
-    cams: list[VideoStream] = [
-        VideoStream(
-            VideoSourceRTP("192.168.1.2"),
-            cv2.VideoWriter("recordings/output-2.avi", fourcc, 30.0, (1280, 960)),
-        ),
-        VideoStream(
-            VideoSourceRTP("192.168.1.3"),
-            cv2.VideoWriter("recordings/output-3.avi", fourcc, 30.0, (1280, 960)),
-        ),
-        VideoStream(
-            VideoSourceRTP("192.168.1.4"),
-            cv2.VideoWriter("recordings/output-4.avi", fourcc, 30.0, (1280, 960)),
-        ),
-    ]
+    config = Config.read()
+    streams: list[VideoStream] = []
 
-    print(f"initiaized {len(cams)} cameras")
+    for c in config.cameras:
+        streams.append(VideoStream(VideoSource(c)))
 
-    viewport = JointViewport(cams)
+
+    logger.info(f"connected to {len(streams)} cameras")
+
+    viewport = JointViewport(streams)
 
     tracked_objects: dict[int, int] = {}
     if not viewport.is_open():
