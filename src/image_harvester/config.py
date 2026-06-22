@@ -13,7 +13,7 @@ FLOWER_CONFIG_PATH = "image-harvester.toml"
 # TODO: Think about video recording location
 @dataclass
 class Camera:
-    # TODO: Use `Path | IPv4Address` types for this
+    # TODO: Currently msgspec doens't support using `Path | IPv4Address` for this.
     uri: str
     # used for stitching together the resulting image
     panorama_location: int
@@ -38,11 +38,13 @@ def dec_hook(type: type[Path], obj: str) -> Path:
     raise TypeError("Type not supported by hook")
 
 
+# NOTE: Make this static?
 @dataclass
 class Config:
     cameras: list[Camera]
     flower_endpoint: str
     recordings_output_dir: Path | None = None
+    yolo_verbose: bool = True
 
     @classmethod
     def read(cls, file: Path | None = None) -> Self:

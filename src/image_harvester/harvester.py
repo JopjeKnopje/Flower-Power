@@ -144,7 +144,9 @@ def harvester() -> None:
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        result = model.track(frame, persist=True, classes=[0])[0]
+        result = model.track(
+            frame, verbose=config.yolo_verbose, persist=True, classes=[0]
+        )[0]
 
         # Get the boxes and track IDs
         if result.boxes and result.boxes.is_track:
