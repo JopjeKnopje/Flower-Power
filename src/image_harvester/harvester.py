@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from ipaddress import IPv4Address
+import pathlib
 from queue import Empty, Queue
 from threading import Thread
 from typing import Self
@@ -8,24 +10,37 @@ import cv2
 from cv2.typing import MatLike
 from ultralytics import YOLO
 
+from image_harvester.config import Config, Camera
 from image_harvester.logger import logger_init
 
 logger = logger_init()
 
 
-VideoSourceURI = str
+class VideoSource(str):
+    # what is this return type?
+    def __new__(cls, c: Camera):
+        uri = c.get_uri()
+        if isinstance(uri, IPv4Address):
+            return VideoSourceRTP(uri, c.rstp_path, c.username, c.password)
+        return VideoSourceURI(uri)
 
 
-# dirty trick hehe
-class VideoSourceRTP(VideoSourceURI):
+class VideoSourceURI(VideoSource):
+    def __new__(cls, path: str | pathlib.Path) -> Self:
+        if isinstance(path, pathlib.Path):
+            path = path.as_uri()
+        return str.__new__(cls, path)
+
+
+class VideoSourceRTP(VideoSource):
     def __new__(
         cls,
-        address: str,
-        path: str = "/axis-media/media.amp",
-        username: str = "root",
-        password: str = "admin",
+        address: str | IPv4Address,
+        path: str,
+        username: str,
+        password: str,
     ) -> Self:
-        return super().__new__(cls, f"rtsp://{username}:{password}@{address}{path}")
+        return str.__new__(cls, f"rtsp://{username}:{password}@{address}{path}")
 
 
 # bufferless VideoCapture: https://stackoverflow.com/a/54755738/7363348
@@ -39,14 +54,14 @@ class VideoStream:
     def __init__(
         self, uri: VideoSourceURI, writer: cv2.VideoWriter | None = None
     ) -> None:
-        self._writer = writer
         self._uri = uri
+        self._writer = writer
         self._cap = cv2.VideoCapture(self._uri)
         self._q = Queue()
 
         if self._writer:
             # TODO: Get VideoWriter filename
-            logger.info(f"VideoWriter attached to VideoStream{uri}")
+            logger.info(f"VideoWriter attached to VideoStream{self._uri}")
 
         if not self._cap.isOpened():
             raise Exception(f"could not open URI {self._uri}")
@@ -107,22 +122,28 @@ def harvester() -> None:
     model = YOLO("yolo26n.pt")
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
 
-    cams: list[VideoStream] = [
-        VideoStream(
-            VideoSourceRTP("192.168.1.2"),
-            cv2.VideoWriter("recordings/output-2.avi", fourcc, 30.0, (1280, 960)),
-        ),
-        VideoStream(
-            VideoSourceRTP("192.168.1.3"),
-            cv2.VideoWriter("recordings/output-3.avi", fourcc, 30.0, (1280, 960)),
-        ),
-        VideoStream(
-            VideoSourceRTP("192.168.1.4"),
-            cv2.VideoWriter("recordings/output-4.avi", fourcc, 30.0, (1280, 960)),
-        ),
-    ]
+    config = Config.read()
 
-    print(f"initiaized {len(cams)} cameras")
+    cams: list[VideoStream] = []
+    for cam in config.cameras:
+        cams.append(VideoStream(uri_from_camera(cam)))
+
+    # cams: list[VideoStream] = [
+    #     VideoStream(
+    #         VideoSourceRTP("192.168.1.2"),
+    #         cv2.VideoWriter("recordings/output-2.avi", fourcc, 30.0, (1280, 960)),
+    #     ),
+    #     VideoStream(
+    #         VideoSourceRTP("192.168.1.3"),
+    #         cv2.VideoWriter("recordings/output-3.avi", fourcc, 30.0, (1280, 960)),
+    #     ),
+    #     VideoStream(
+    #         VideoSourceRTP("192.168.1.4"),
+    #         cv2.VideoWriter("recordings/output-4.avi", fourcc, 30.0, (1280, 960)),
+    #     ),
+    # ]
+
+    logger.info(f"connected to {len(cams)} cameras")
 
     viewport = JointViewport(cams)
 
