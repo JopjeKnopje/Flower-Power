@@ -13,14 +13,14 @@ FLOWER_CONFIG_PATH = "image-harvester.toml"
 # TODO: Think about video recording location
 @dataclass
 class Camera:
-    # used for stitching together the resulting image
+    # TODO: Use `Path | IPv4Address` types for this
     uri: str
+    # used for stitching together the resulting image
     panorama_location: int
 
-    rstp_path: str | None
-    username: str | None
-    password: str | None
-    # TODO: Use `Path | IPv4Address` types for this
+    rstp_path: str | None = "/axis-media/media.amp"
+    username: str | None = "root"
+    password: str | None = "admin"
 
     # dirty trick, we just parse at runtime
     def get_uri(self) -> Path | IPv4Address:
@@ -42,7 +42,7 @@ def dec_hook(type: type[Path], obj: str) -> Path:
 class Config:
     cameras: list[Camera]
     flower_endpoint: str
-    recordings_output_dir: Path | None
+    recordings_output_dir: Path | None = None
 
     @classmethod
     def read(cls, file: Path | None = None) -> Self:
