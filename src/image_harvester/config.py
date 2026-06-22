@@ -18,9 +18,9 @@ class Camera:
     # used for stitching together the resulting image
     panorama_location: int
 
-    rstp_path: str | None = "/axis-media/media.amp"
-    username: str | None = "root"
-    password: str | None = "admin"
+    rstp_path: str = "/axis-media/media.amp"
+    username: str = "root"
+    password: str = "admin"
 
     # dirty trick, we just parse at runtime
     def get_uri(self) -> Path | IPv4Address:
