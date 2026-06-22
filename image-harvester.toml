@@ -1,19 +1,17 @@
 flower_endpoint = "192.168.0.42"
 recordings_output_dir = "test-recordings"
-
-[[cameras]]
-uri = "192.168.0.9"
-panorama_location = 1
-# optional (only valid when using anything other than a filepath)
-rstp_path = "/axis-media/media.amp"
-username = "root"
-password = "admin"
-
+yolo_verbose = false
 
 [[cameras]]
 uri = "192.168.0.2"
+panorama_location = 1
+
+[[cameras]]
+uri = "192.168.0.3"
 panorama_location = 2
-# optional (only valid when using anything other than a filepath)
-rstp_path = "/axis-media/media.amp"
-username = "root"
-password = "admin"
+
+
+[[cameras]]
+uri = "192.168.0.4"
+panorama_location = 2
+
