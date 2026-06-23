@@ -4,12 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
-    { name = "joppe", email = "jboeve009@gmail.com" }
+    { name = "Joppe Boeve", email = "jboeve009@gmail.com" }
 ]
 requires-python = ">=3.13"
 
 dependencies = [
-    "torch==2.11.0+cu126",
     "torchvision==0.26.0",
     "msgspec>=0.21.1",
     "pillow>=12.2.0",
@@ -23,32 +22,25 @@ dev = [
 ]
 
 [project.scripts]
-ih = "image_harvester:harvester"
+image-harvester = "image_harvester:harvester"
 ping-test = "image_harvester:ping"
 
 
 [tool.uv.build-backend]
-# Say which top-level package you are shipping
+# Since our project name is different from the module's name, we have to tell uv where to find it
 module-name = "image_harvester"
 # It lives at the project root (not under src/)
 module-root = "src"
-# namespace   = true
-
-
-[tool.uv.sources]
-torch = [
-  { index = "pytorch-cu126" },
-]
-torchvision = [
-  { index = "pytorch-cu126" },
-]
-
-[[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
-explicit = true
 
 [build-system]
 requires = ["uv_build>=0.11.14,<0.12.0"]
 build-backend = "uv_build"
+
+
+
+# https://github.com/astral-sh/uv/issues/9277#issuecomment-2787390227
+[tool.uv]
+# This is necessary to avoid problems like trying to look for colorama, appnope, or pywin32
+# since they aren't going to be in our local Linux-only index.
+environments = ["sys_platform == 'linux'"]
 

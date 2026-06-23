@@ -69,7 +69,10 @@ hostname: `flower-brain` address
 
 ### Deploying to PI
 The PI shouldn't have internet access (something something security).
-1. Export the packages from our [`pyproject.toml`](pyproject.toml)
+1. Export the packages from our [`pyproject.toml`](pyproject.toml) using `uv export --no-hashes --no-emit-project --locked -o requirements-dev.txt`.
+2. Download the exported packages to `pip download --no-cache-dir -r requirements-dev.txt -d packages --extra-index-url https://download.pytorch.org/whl/cu126`
+3. Upload the entire thing to the PI (this will take 4 years) using `./rpi/upload.sh`
+4. on the PI run `uv sync -f packages`
 
 
 
@@ -98,3 +101,4 @@ scp -r .venv 192.168.1.135:~/app
 ## Credits
 - [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)
 - [colored logging python](https://stackoverflow.com/a/56944256/7363348)
+- [uv offline deps](https://github.com/astral-sh/uv/issues/9277)

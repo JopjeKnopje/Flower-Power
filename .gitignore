@@ -7,3 +7,4 @@ test-vids/
 # don't wanna commit that UNIT
 yolo26n.pt
 dist/
+packages/
