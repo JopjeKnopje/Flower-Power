@@ -51,6 +51,7 @@ You should now be able to reach the camera (and any other devices on the network
 
 ## Raspberry PI
 ### Flashing the OS
+TODO: Use the cli version with this
 I've flashed the an 64gb SD-card using [`rpi-imager`](https://github.com/raspberrypi/rpi-imager).
 1. `Device -> Raspberry PI 4`.
 2. `OS -> Raspberry PI OS (other) -> Raspberry PI OS Lite (64-bit)`.

@@ -42,5 +42,7 @@ build-backend = "uv_build"
 [tool.uv]
 # This is necessary to avoid problems like trying to look for colorama, appnope, or pywin32
 # since they aren't going to be in our local Linux-only index.
-environments = ["sys_platform == 'linux'"]
-
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform != 'linux' and platform_machine == 'aarch64'"
+]
