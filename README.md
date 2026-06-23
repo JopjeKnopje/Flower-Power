@@ -58,7 +58,30 @@ I've flashed the an 64gb SD-card using [`rpi-imager`](https://github.com/raspber
 4. `hostname -> 'flower-brain'`
 
 
+### Network configuration
+Find out the static ip address of the RPI SSH into it with the previously setup key.
+
 hostname: `flower-brain` address
+
+```
+```
+
+
+### Deploying to PI
+The PI shouldn't have internet access (something something security).
+1. Export the packages from our [`pyproject.toml`](pyproject.toml)
+
+
+
+### TO Copy
+scp -r .venv 192.168.1.135:~/app
+
+- Lockfile
+- pyproject.toml
+- uv install?
+- copy `pysrc`
+- add `$VENV` to `$PATH`
+- add `pysrc` to `$PYTHONPATH`
 
 
 
