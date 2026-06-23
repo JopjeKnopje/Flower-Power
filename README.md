@@ -49,6 +49,20 @@ sudo ip addr add 192.168.0.1/24 dev enp42s0
 You should now be able to reach the camera (and any other devices on the network)
 
 
+## Raspberry PI
+### Flashing the OS
+I've flashed the an 64gb SD-card using [`rpi-imager`](https://github.com/raspberrypi/rpi-imager).
+1. `Device -> Raspberry PI 4`.
+2. `OS -> Raspberry PI OS (other) -> Raspberry PI OS Lite (64-bit)`.
+3. Select the available storage drive.
+4. `hostname -> 'flower-brain'`
+
+
+hostname: `flower-brain` address
+
+
+
+
 
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
