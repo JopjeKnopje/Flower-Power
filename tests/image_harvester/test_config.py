@@ -87,6 +87,7 @@ def test_create_source_uri() -> None:
     assert s == f"{os.getcwd()}/{filename}"
 
 
+@pytest.mark.xfail(reason="Camera may not be connected")
 def test_create_streams() -> None:
     config = Config(
         flower_endpoint="192.168.0.42",

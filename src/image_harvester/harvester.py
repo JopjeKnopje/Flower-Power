@@ -7,7 +7,7 @@ import time
 import httpx
 from queue import Empty, Queue
 from threading import Thread
-from typing import Self
+from typing import Callable, Self
 
 import cv2
 from cv2.typing import MatLike
@@ -62,29 +62,32 @@ class VideoStream:
     _uri: VideoSource
     _cap: cv2.VideoCapture
     _q: Queue[MatLike]
+    _out_path: Path | None
     _writer: cv2.VideoWriter | None = None
 
     def __init__(self, uri: VideoSource, out_path: pathlib.Path | None = None) -> None:
         self._uri = uri
+        self._out_path = out_path
         self._cap = cv2.VideoCapture(self._uri)
         self._q = Queue()
-        logging.info(f"VideoStream[{self._uri}] initializing ...")
+        self._log("initializing ...")
 
         if out_path is not None:
             self._writer = self._init_writer(out_path)
-            logger.info(f"VideoWriter attached to VideoStream {self._uri}")
+            self._log(f"VideoWriter attached to VideoStream {self._uri}")
 
         if not self._cap.isOpened():
             raise Exception(f"could not open URI {self._uri}")
 
-        logging.info(f"VideoStream[{self._uri}] initialized, writing to {out_path}...")
+        self._log(f"initialized, writing to {out_path}...")
         Thread(target=self._reader, daemon=True).start()
 
     def _init_writer(self, path: pathlib.Path) -> None:
         self._writer = cv2.VideoWriter(path, FOURCC, FPS, (self.width, self.height))
 
     def _reader(self) -> None:
-        logger.info("started _reader thread")
+        self._log("started _reader thread")
+
         while True:
             # TODO: this exception will exit the thread, handle that some way
             success, frame = self._cap.read()
@@ -101,6 +104,16 @@ class VideoStream:
                 except Empty:
                     pass
             self._q.put(frame)
+
+    def _log(self, s: str, log_level: Callable[[str], None] = logging.info) -> None:
+        log_level(f"VideoStream[{self._uri}] {s}")
+
+    def release(self) -> None:
+        if self._writer:
+            self._writer.release()
+            self._log(f"released writing device {self._out_path}")
+        self._cap.release()
+        self._log("released capture device")
 
     @property
     def width(self) -> int:
@@ -138,6 +151,10 @@ class JointViewport:
 
             imgs.append(img)
         return cv2.hconcat(imgs)
+
+    def release(self) -> None:
+        for s in self.video_streams:
+            s.release()
 
 
 # TODO: Make this actually something smaert
@@ -229,13 +246,13 @@ def harvester() -> None:
 
     # Loop through the video frames
     while viewport.is_open():
-        tracked_objects: list = []
-
         try:
             frame = viewport.read()
         except Exception as e:
             logger.error(e)
             continue
+
+        tracked_objects: list[int] = []
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
@@ -266,6 +283,7 @@ def harvester() -> None:
 
         value = calculate_frames(height, tracked_objects)
 
+        # TODO: Replace this really dirty time
         delta = time.time() - time_old
         if delta > config.flower_interval:
             make_request(config.flower_endpoint, value)
@@ -277,4 +295,5 @@ def harvester() -> None:
 
     # Release the video capture object and close the display window
     # TODO: Close video caps
+    viewport.release()
     cv2.destroyAllWindows()
