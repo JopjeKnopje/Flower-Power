@@ -1,8 +1,20 @@
 # Flower-Power
-This repo contians the packages and tooling for the Flower Power project.
+This repo contains packages and tooling for the Flower Power project, currently this setup is supposed to run on a linux based laptop.
 
-- Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of  humans it detects. And output that value to the hydraulic controller.
+Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of  humans it detects. And output that value to the hydraulic controller using HTTP requests.
 
+
+## Installation
+```bash
+git clone https://github.com/JopjeKnopje/Flower-Power
+uv sync --all-packages
+```
+
+### Running
+Running the image-harvester
+```bash
+uv run image-harvester
+```
 
 
 
@@ -12,29 +24,12 @@ This repo contians the packages and tooling for the Flower Power project.
 - [ruff](https://docs.astral.sh/ruff/editors/setup/)
 - [basedpyright](https://github.com/DetachHead/basedpyright)
 
-## After cloning
-Install all the packages within the [`uv workspace`](https://docs.astral.sh/uv/concepts/projects/workspaces/)
-```bash
-uv sync --all-packages
-```
 
-## Running
-Running the image-harvester
-```bash
-uv run image-harvester
-```
-
-### Other uv commands
-Add a dependency to a package
-```bash
-uv add --package <package> <dependency-to-install>
-```
-
-
+## Hardware
 ### Camera setup
-The camera's are running on `192.168.0.X/24`. They are marked with their number representing their `X` value.
+The camera's are running on `192.168.0.X/24`. They are marked (see [photo](docs/cameras.jpg)) with their number representing their `X` value.
 They are looking for a gateway at `192.168.0.1`, in order to reach the camera's we can set our machine's address to that.
-#### Reaching the cameras
+### Reaching the cameras
 Under linux you can add multiple addresses to your network interface.
 ```bash
 # sudo ip addr add 192.168.0.1/24 dev <dev>
