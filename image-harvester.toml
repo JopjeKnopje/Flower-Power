@@ -4,14 +4,11 @@ yolo_verbose = false
 
 [[cameras]]
 uri = "192.168.0.2"
-panorama_location = 1
 
 [[cameras]]
 uri = "192.168.0.3"
-panorama_location = 2
 
 
 [[cameras]]
 uri = "192.168.0.4"
-panorama_location = 2
 

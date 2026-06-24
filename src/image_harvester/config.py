@@ -15,8 +15,6 @@ FLOWER_CONFIG_PATH = "image-harvester.toml"
 class Camera:
     # TODO: Currently msgspec doens't support using `Path | IPv4Address` for this.
     uri: str
-    # used for stitching together the resulting image
-    panorama_location: int
 
     rstp_path: str = "/axis-media/media.amp"
     username: str = "root"
