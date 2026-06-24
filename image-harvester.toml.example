@@ -1,11 +1,21 @@
 # ip address of the hydraulic controller
 flower_endpoint = "http://192.168.0.42"
-# OPTIONAL: when set, it will record the seperate camera feeds to this output dir.
+
+# OPTIONAL: when `recording_dir` is set, it will record the seperate camera feeds to this output dir.
+# The filename will be as follows `cam-X-Y.avi`
+#
+# `X` is the camera number, this is based on the order the appear in the config file.
+#     In this case the camera at address `192.168.0.2` will have an `X` value of `0`
+# `Y` is the part_id, this will rise as you have more recordings.
 recording_dir = "sample_recordings"
+
 # OPTIONAL: the interval between updates to the flower (default is 3)
 flower_interval = 30
+
 # OPTIONAL: enable YOLO's logging (default is true)
 yolo_verbose = false
+
+
 
 # camera entry, this is a TOML list so you can add as many as you want (until we run out of memory lol)
 [[cameras]]
