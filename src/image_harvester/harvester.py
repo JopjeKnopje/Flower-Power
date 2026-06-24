@@ -116,8 +116,12 @@ class JointViewport:
         return cv2.hconcat(imgs)
 
 
-def make_request(endpoint: str, objs: dict[int, int]) -> None:
-    httpx.request("GET", endpoint)
+def make_request(endpoint: str, objs: list[int]) -> None:
+    value = sum(objs) / len(objs)
+
+    r = httpx.request("GET", f"{endpoint}/")
+    if r.status_code >= 400:
+        logger.warning(f"received status {r.status_code}")
 
 
 def harvester() -> None:
@@ -135,9 +139,9 @@ def harvester() -> None:
 
     viewport = JointViewport(streams)
 
-    tracked_objects: dict[int, int] = {}
+    obj_diags: list[int] = []
     if not viewport.is_open():
-        print("error viewport not open")
+        logger.error("cannot open viewport")
 
     # Loop through the video frames
     while viewport.is_open():
@@ -163,10 +167,10 @@ def harvester() -> None:
                 x, y, w, h = box
                 if model.names[int(box_cls)] != "person":
                     continue
-                object_diagonal = sqrt(w**2 + h**2)
 
-                print(f"object {track_id} size {object_diagonal}")
-                tracked_objects[track_id] = int(object_diagonal)
+                object_diagonal = sqrt(w**2 + h**2)
+                obj_diags.append(int(object_diagonal)) 
+                logger.info(f"object {track_id} size {object_diagonal}")
 
             # Visualize the result on the frame
             frame = result.plot()
@@ -174,8 +178,7 @@ def harvester() -> None:
 
         # Display the annotated frame
         cv2.imshow(f"Flower Power @ {width}x{height}", frame)
-
-        make_request(tracked_objects)
+        make_request(obj_diags)
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):
