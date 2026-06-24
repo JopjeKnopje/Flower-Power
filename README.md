@@ -18,13 +18,25 @@ git clone https://github.com/JopjeKnopje/Flower-Power
 uv sync --all-packages
 ```
 
+2. Make sure the config file values are correctly set, see [example](image-harvester.toml.example) config file.
 
-2. Make sure the config file values are correctly set, see example [config file](image-harvester.toml.example)
+3. Before running the image-harvester make sure that your machine can reach the cameras. see 
 
 3. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
 uv run image-harvester
 ```
+
+
+## Trouble shooting
+If for some reason the image-harvester won't connect to the camera(s)
+
+Try seeing if they are reachable, I've made a tool which will ping the cameras defined in the config file.
+You can run it with.
+```bash
+uv run ping-test
+```
+
 
 
 
