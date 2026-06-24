@@ -4,25 +4,29 @@ This repo contains packages and tooling for the Flower Power project, currently 
 Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of  humans it detects. And output that value to the hydraulic controller using HTTP requests.
 
 
+## Dependencies
+- [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) 
+- [prek](https://prek.j178.dev/installation/) (dev)
+- [ruff](https://docs.astral.sh/ruff/editors/setup/) (dev)
+- [basedpyright](https://github.com/DetachHead/basedpyright) (dev)
+
+
 ## Installation
+1. Clone the repo and install its packages
 ```bash
 git clone https://github.com/JopjeKnopje/Flower-Power
 uv sync --all-packages
 ```
 
-### Running
-Running the image-harvester
+
+2. Make sure the config file values are correctly set, see example [config file](image-harvester.toml.example)
+
+3. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
 uv run image-harvester
 ```
 
 
-
-## Dev dependencies
-- [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods)
-- [prek](https://prek.j178.dev/installation/)
-- [ruff](https://docs.astral.sh/ruff/editors/setup/)
-- [basedpyright](https://github.com/DetachHead/basedpyright)
 
 
 ## Hardware
@@ -38,7 +42,6 @@ sudo ip addr add 192.168.0.1/24 dev enp42s0
 ```
 
 You should now be able to reach the camera (and any other devices on the network)
-
 
 ## Roadmap
 
