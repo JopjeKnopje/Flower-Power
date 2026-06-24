@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from ipaddress import IPv4Address
+import httpx
 import pathlib
 from queue import Empty, Queue
 from threading import Thread
@@ -115,6 +116,10 @@ class JointViewport:
         return cv2.hconcat(imgs)
 
 
+def make_request(endpoint: str, objs: dict[int, int]) -> None:
+    httpx.request("GET", endpoint)
+
+
 def harvester() -> None:
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")
@@ -169,6 +174,8 @@ def harvester() -> None:
 
         # Display the annotated frame
         cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+
+        make_request(tracked_objects)
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):
