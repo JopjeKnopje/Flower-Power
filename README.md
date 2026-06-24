@@ -21,7 +21,7 @@ uv sync --all-packages
 
 2. Make sure the config file values are correctly set, see [example](image-harvester.toml.example) config file.
 
-3. Before running the image-harvester make sure that your machine can reach the cameras, see [Reaching the cameras](#reaching-the-cameras).
+3. Before running the image-harvester make sure that your machine can reach the cameras, see [reaching the cameras](#reaching-the-cameras).
 
 3. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
