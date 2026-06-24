@@ -22,7 +22,6 @@ def x() -> pathlib.Path | IPv4Address:
 def config_data() -> str:
     data = """
     flower_endpoint = "192.168.0.42"
-    recordings_output_dir = "test-recordings"
 
     [[cameras]]
     uri = "192.168.0.4"
