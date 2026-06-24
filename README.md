@@ -83,6 +83,7 @@ Set the password to `admin`
 - Tweak model (set minimum confidence score threshold in config file?)
 - Send out a status check to the hydraulic controller at the same time it connects with the cameras to make sure its online
 - Set it up on a RPI (ansible? or some other iac tool) and write setup instructions for that.
+- Container to keep track of all the file recording stuff, such as the filepath.
 - Script to do initial setup of the cameras.
 - Add threading while connecting to the cameras.
 - Benchmark yolo runs and image stitching parts of the program

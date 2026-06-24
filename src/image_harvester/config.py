@@ -42,6 +42,8 @@ class Config:
     cameras: list[Camera]
     flower_endpoint: str
     yolo_verbose: bool = True
+    flower_interval: int = 3
+    recording_dir: str | None = None
 
     @classmethod
     def read(cls, file: Path | None = None) -> Self:
