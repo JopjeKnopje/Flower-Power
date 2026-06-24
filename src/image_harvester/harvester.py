@@ -72,9 +72,13 @@ class VideoStream:
         self._q = Queue()
         self._log("initializing ...")
 
-        if out_path is not None:
-            self._writer = self._init_writer(out_path)
-            self._log(f"VideoWriter attached to VideoStream {self._uri}")
+        if self._out_path is not None:
+            self._writer = cv2.VideoWriter(
+                self._out_path, FOURCC, FPS, (self.width, self.height)
+            )
+            self._log(
+                f"attached VideoWriter[{self._out_path}] to VideoStream {self._uri}"
+            )
 
         if not self._cap.isOpened():
             raise Exception(f"could not open URI {self._uri}")
@@ -82,20 +86,18 @@ class VideoStream:
         self._log(f"initialized, writing to {out_path}...")
         Thread(target=self._reader, daemon=True).start()
 
-    def _init_writer(self, path: pathlib.Path) -> None:
-        self._writer = cv2.VideoWriter(path, FOURCC, FPS, (self.width, self.height))
-
     def _reader(self) -> None:
         self._log("started _reader thread")
 
         while True:
             # TODO: this exception will exit the thread, handle that some way
+            # TODO: this will fail due to it not being mutex locked when we call `release()`
             success, frame = self._cap.read()
             if not success:
                 raise Exception(f"failed reading {self}")
 
             # used for recording test footage
-            if self._writer is not None:
+            if self._writer:
                 self._writer.write(frame)
 
             if not self._q.empty():
@@ -196,13 +198,13 @@ def recording_path_file_name(cam_id: int, part_id: int) -> str:
     return f"cam-{cam_id}-{part_id}.avi"
 
 
-def recording_path_find_part_id(path: Path) -> int:
+def recording_path_find_part_id(dir_path: Path) -> int:
     """
     Finds the closest file `part` in a file path e.g `cam-1-X`
     """
 
     # TODO: use some kind of class or container that keeps track of all the filepaths
-    p = path.glob("cam-*-*.avi")
+    p = dir_path.glob("cam-*-*.avi")
 
     part_id_max = 0
     for f in p:
@@ -214,12 +216,13 @@ def recording_path_find_part_id(path: Path) -> int:
 
         if part_id > part_id_max:
             part_id_max = part_id
-    return part_id_max
+    return part_id_max + 1
 
 
-def recording_get_path(path: Path, cam_id: int) -> Path:
-    part_id = recording_path_find_part_id(path)
-    return Path(recording_path_file_name(cam_id, part_id))
+def recording_get_path(dir_path: Path, cam_id: int) -> Path:
+    dir_path.mkdir(exist_ok=True)
+    part_id = recording_path_find_part_id(dir_path)
+    return dir_path.joinpath(Path(recording_path_file_name(cam_id, part_id)))
 
 
 def harvester() -> None:
@@ -230,8 +233,8 @@ def harvester() -> None:
         writer_out_path = None
         if config.recording_dir:
             writer_out_path = recording_get_path(Path(f"{config.recording_dir}"), i)
-
         streams.append(VideoStream(VideoSource(c), writer_out_path))
+
     logger.info(f"connected to {len(streams)} cameras")
 
     viewport = JointViewport(streams)
@@ -239,7 +242,7 @@ def harvester() -> None:
     if not viewport.is_open():
         print("error viewport not open")
 
-    time_old = time.time() + 5
+    time_old = time.time() + config.flower_interval
 
     # Load the YOLO26 model
     model = YOLO("yolo26n.pt")

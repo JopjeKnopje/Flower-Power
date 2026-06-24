@@ -30,7 +30,7 @@ def test_find_new_path_part() -> None:
     tmp_dir.joinpath(Path("random-file-that-should-not-be-listed")).touch()
 
     part_max = recording_path_find_part_id(tmp_dir)
-    assert part_max is max(file_count_parts) - 1
+    assert part_max is max(file_count_parts)
 
 
 def test_find_new_path_part_no_files() -> None:
