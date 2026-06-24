@@ -78,6 +78,7 @@ Set the password to `admin`
 
 
 ## Todo V2
+- Add `cam_id` to config file, also check that there are no duplicates
 - Ping tool also pings flower endpoint lol
 - Tweak model (set minimum confidence score threshold in config file?)
 - Send out a status check to the hydraulic controller at the same time it connects with the cameras to make sure its online
