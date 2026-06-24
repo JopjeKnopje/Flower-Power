@@ -23,7 +23,7 @@ dev = [
 ]
 
 [project.scripts]
-ih = "image_harvester:harvester"
+image-harvester = "image_harvester:harvester"
 ping-test = "image_harvester:ping"
 
 

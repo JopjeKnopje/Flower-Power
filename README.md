@@ -1,12 +1,8 @@
 # Flower-Power
-This repo contians all the packages and tooling for the Flower Power project.
+This repo contians the packages and tooling for the Flower Power project.
 
-The project currently has 2 main parts, and a 3rd for debugging and development.
+- Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of  humans it detects. And output that value to the hydraulic controller.
 
-- Image Harvester: Computer vision model, this will detect certain actions/movements of a crowd of people. And output a dataset (tbd) for our Flour Brain to use.
-- Flour Brain: takes the previously generated dataset and generates reponses for it, it will talk to the 
-
-- Hydraulic-sim: Simulatating the hydraulic cylinder's movement and providing a fake serial interface for our Flour Brain to talk to. I'd like for this to have a pytest interface as well so we can run some tests on the "cylinder".
 
 
 
@@ -48,6 +44,8 @@ sudo ip addr add 192.168.0.1/24 dev enp42s0
 
 You should now be able to reach the camera (and any other devices on the network)
 
+
+## Roadmap
 
 
 ## Resources
