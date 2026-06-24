@@ -1,7 +1,12 @@
 from __future__ import annotations
+import asyncio
 from dataclasses import dataclass
 from ipaddress import IPv4Address
+import logging
+import math
 import pathlib
+import time
+import httpx
 from queue import Empty, Queue
 from threading import Thread
 from typing import Self
@@ -15,7 +20,9 @@ from image_harvester.config import Config, Camera
 from image_harvester.logger import logger_init
 
 logger = logger_init()
-
+logging.getLogger("httpx").setLevel("CRITICAL")
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("httpx").propagate = False
 
 class VideoSource(str):
     def __new__(cls, c: Camera) -> VideoSource:
@@ -114,6 +121,43 @@ class JointViewport:
             imgs.append(img)
         return cv2.hconcat(imgs)
 
+#TODO: Make this actually something smaert
+def calculate_frames(frame_h: int, obj_h: list[int]) -> int:
+    close_threshold = 0.5
+
+    close_count = 0
+    away_count = 0
+
+    for o in obj_h:
+        # higher = closer
+        ratio = 1 - (frame_h - o) / frame_h
+        logger.info(f"frame {ratio}")
+        if ratio > close_threshold:
+            close_count += 2
+        else:
+            away_count += 1
+
+    value = int(close_count + away_count)
+    logger.info(f"value {value} close_count {close_count} away_count {away_count}")
+
+
+    return value
+
+
+
+def make_request(endpoint: str, value: int) -> None:
+    if value > 0 and value < 9:
+        r_str = f"{endpoint}/move?band={value}"
+        r = httpx.request("GET", url=r_str)
+        logging.info(f"send request {r_str}")
+
+        log_str = f"controller HTTP: {r.status_code}"
+        if r.status_code >= 400:
+            logging.warning(log_str)
+        elif r.status_code:
+            logging.info(log_str)
+
+
 
 def harvester() -> None:
     # Load the YOLO26 model
@@ -130,12 +174,15 @@ def harvester() -> None:
 
     viewport = JointViewport(streams)
 
-    tracked_objects: dict[int, int] = {}
     if not viewport.is_open():
         print("error viewport not open")
 
+    time_old = time.time() + 5
+
     # Loop through the video frames
     while viewport.is_open():
+        tracked_objects: list[int] = []
+
         try:
             frame = viewport.read()
         except Exception as e:
@@ -158,17 +205,24 @@ def harvester() -> None:
                 x, y, w, h = box
                 if model.names[int(box_cls)] != "person":
                     continue
-                object_diagonal = sqrt(w**2 + h**2)
+                object_diagonal = h
+                tracked_objects.append(int(object_diagonal))
 
-                print(f"object {track_id} size {object_diagonal}")
-                tracked_objects[track_id] = int(object_diagonal)
 
             # Visualize the result on the frame
             frame = result.plot()
         height, width, _ = frame.shape
+        # TODO Get from camera property
 
         # Display the annotated frame
         cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+
+        value = calculate_frames(height, tracked_objects)
+
+        delta = time.time() - time_old
+        if delta > 3.0:
+            make_request(config.flower_endpoint, value)
+            time_old = time.time()
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):

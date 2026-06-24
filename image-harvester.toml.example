@@ -1,5 +1,5 @@
 # ip address of the hydraulic controller
-flower_endpoint = "192.168.0.42"
+flower_endpoint = "http://192.168.0.42"
 # enable YOLO's logging, (this will spam your console)
 yolo_verbose = false
 
@@ -10,7 +10,6 @@ uri = "192.168.0.2"
 
 [[cameras]]
 uri = "192.168.0.3"
-
 
 [[cameras]]
 uri = "192.168.0.4"

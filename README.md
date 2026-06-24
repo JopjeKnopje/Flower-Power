@@ -90,7 +90,7 @@ Set the password to `admin`
 - Check the camera resolution
 - Increase yolo resolution?
 - Do 2 builds/modes?, one for x86_64 and the other for ARM64
-
+- `value = math.tanh(1 * math.pi / 2)  * 10`
 
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
