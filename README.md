@@ -20,7 +20,7 @@ uv sync --all-packages
 
 2. Make sure the config file values are correctly set, see [example](image-harvester.toml.example) config file.
 
-3. Before running the image-harvester make sure that your machine can reach the cameras. see 
+3. Before running the image-harvester make sure that your machine can reach the cameras. see [asd](#reaching-the-cameras)
 
 3. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
@@ -43,7 +43,7 @@ uv run ping-test
 
 ## Hardware
 ### Camera setup
-The camera's are running on `192.168.0.X/24`. They are marked (see [photo](docs/cameras.jpg)) with their number representing their `X` value.
+The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with their number representing the last digit of their IP address.
 They are looking for a gateway at `192.168.0.1`, in order to reach the camera's we can set our machine's address to that.
 ### Reaching the cameras
 Under linux you can add multiple addresses to your network interface.
