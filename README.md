@@ -1,7 +1,8 @@
 # Flower-Power
 This repo contains packages and tooling for the Flower Power project, currently this setup is supposed to run on a linux based laptop.
 
-Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of  humans it detects. And output that value to the hydraulic controller using HTTP requests.
+
+Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of humans it detects. And output that value to the hydraulic controller using HTTP requests.
 
 
 ## Dependencies
@@ -20,7 +21,7 @@ uv sync --all-packages
 
 2. Make sure the config file values are correctly set, see [example](image-harvester.toml.example) config file.
 
-3. Before running the image-harvester make sure that your machine can reach the cameras. see [asd](#reaching-the-cameras)
+3. Before running the image-harvester make sure that your machine can reach the cameras, see [Reaching the cameras](#reaching-the-cameras).
 
 3. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
@@ -28,21 +29,15 @@ uv run image-harvester
 ```
 
 
-## Trouble shooting
-If for some reason the image-harvester won't connect to the camera(s)
-
-Try seeing if they are reachable, I've made a tool which will ping the cameras defined in the config file.
-You can run it with.
-```bash
-uv run ping-test
-```
-
-
 
 
 
 ## Hardware
-### Camera setup
+We are using a PoE Switch to power the cameras, the cameras don't actually have internet access.
+
+The cameras we're using are [AXIS P3364-VE](https://www.axis.com/dam/public/ee/0b/43/axis-p3364-ve--user-manual-en-US-113863.pdf) security cameras (without their creepy housing).
+
+### Camera addressing
 The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with their number representing the last digit of their IP address.
 They are looking for a gateway at `192.168.0.1`, in order to reach the camera's we can set our machine's address to that.
 ### Reaching the cameras
@@ -55,7 +50,17 @@ sudo ip addr add 192.168.0.1/24 dev enp42s0
 
 You should now be able to reach the camera (and any other devices on the network)
 
-## Roadmap
+
+## Troubleshooting
+If for some reason the image-harvester won't connect to the camera(s)
+
+Try seeing if they are reachable, I've made a tool which will ping the cameras defined in the config file.
+You can run it with.
+```bash
+uv run ping-test
+```
+
+## Todo
 
 
 ## Resources
