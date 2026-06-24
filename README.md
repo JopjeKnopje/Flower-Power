@@ -77,8 +77,8 @@ Set the password to `admin`
 
 
 
-
 ## Todo V2
+- Ping tool also pings flower endpoint lol
 - Tweak model (set minimum confidence score threshold in config file?)
 - Send out a status check to the hydraulic controller at the same time it connects with the cameras to make sure its online
 - Set it up on a RPI (ansible? or some other iac tool) and write setup instructions for that.
