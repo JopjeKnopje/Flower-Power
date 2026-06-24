@@ -26,7 +26,6 @@ def config_data() -> str:
 
     [[cameras]]
     uri = "192.168.0.4"
-    panorama_location = 1
     rstp_path = "/axis-media/media.amp"
     username = "root"
     password = "admin"
@@ -34,7 +33,6 @@ def config_data() -> str:
 
     [[cameras]]
     uri = "192.168.0.200"
-    panorama_location = 2
     rstp_path = "/axis-media/media.amp"
     username = "root"
     password = "admin"
@@ -94,9 +92,9 @@ def test_create_streams() -> None:
     config = Config(
         flower_endpoint="192.168.0.42",
         cameras=[
-            Camera("192.168.0.2", panorama_location=1),
-            Camera("192.168.0.3", panorama_location=2),
-            Camera("192.168.0.4", panorama_location=3),
+            Camera("192.168.0.2"),
+            Camera("192.168.0.3"),
+            Camera("192.168.0.4"),
         ],
     )
 
