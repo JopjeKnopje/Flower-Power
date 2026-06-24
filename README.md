@@ -38,17 +38,20 @@ We are using a PoE Switch to power the cameras, the cameras don't actually have 
 The cameras we're using are [AXIS P3364-VE](https://www.axis.com/dam/public/ee/0b/43/axis-p3364-ve--user-manual-en-US-113863.pdf) security cameras (without their creepy housing).
 
 ### Camera addressing
-The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with their number representing the last digit of their IP address.
-They are looking for a gateway at `192.168.0.1`, in order to reach the camera's we can set our machine's address to that.
+The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with their number representing the last digits of their IP address.
+
 ### Reaching the cameras
-Under linux you can add multiple addresses to your network interface.
+In order to reach the camaras we have to tell our machine that, you can do this by _adding_ a static IP address to your network interface.
+Which will also add a route to your routing table. (`ip route`)
+
+You can add the address to your network interface with.
 ```bash
-# sudo ip addr add 192.168.0.1/24 dev <dev>
+# sudo ip addr add 192.168.0.20/24 dev <dev>
 # in my case:
-sudo ip addr add 192.168.0.1/24 dev enp42s0
+sudo ip addr add 192.168.0.20/24 dev enp42s0
 ```
 
-You should now be able to reach the camera (and any other devices on the network)
+You should now be able to reach the camera (and any other devices on that network)
 
 
 ## Troubleshooting
