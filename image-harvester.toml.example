@@ -1,18 +1,21 @@
+# ip address of the hydraulic controller
 flower_endpoint = "192.168.0.42"
+# enable YOLO's logging, (this will spam your console)
+yolo_verbose = false
 
+# camera entry, this is a TOML list so you can add as many as you want (within reason lol)
 [[cameras]]
+# the IP address of the camera or a local filepath to a videofile
 uri = "192.168.0.2"
-panorama_location = 1
 
 [[cameras]]
 uri = "192.168.0.3"
-panorama_location = 1
 
 
 [[cameras]]
 uri = "192.168.0.4"
-panorama_location = 2
-# the following lines are optional and only used valid when using anything other than a local filepath
+
+# the following lines are optional and only valid when using anything other than a local filepath
 rstp_path = "/axis-media/media.amp"
 username = "root"
 password = "admin"
