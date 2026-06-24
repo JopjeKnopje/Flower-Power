@@ -1,18 +1,16 @@
 flower_endpoint = "192.168.0.42"
-# optional
-recordings_output_dir = "test-recordings"
 
 [[cameras]]
 uri = "192.168.0.2"
 panorama_location = 1
 
 [[cameras]]
-uri = "192.168.0.9"
+uri = "192.168.0.3"
 panorama_location = 1
 
 
 [[cameras]]
-uri = "192.168.0.2"
+uri = "192.168.0.4"
 panorama_location = 2
 # the following lines are optional and only used valid when using anything other than a local filepath
 rstp_path = "/axis-media/media.amp"

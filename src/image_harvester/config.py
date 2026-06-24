@@ -41,7 +41,6 @@ def dec_hook(type: type[Path], obj: str) -> Path:
 class Config:
     cameras: list[Camera]
     flower_endpoint: str
-    recordings_output_dir: Path | None = None
     yolo_verbose: bool = True
 
     @classmethod
