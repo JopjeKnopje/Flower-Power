@@ -1,15 +1,15 @@
-flower_endpoint = "http://192.168.0.42"
+flower_endpoint = "http://192.168.0.20:8080"
 recording_dir = "sample_recordings"
-flower_interval = 30
+flower_interval = 5
 yolo_verbose = false
 
 
+
+[[cameras]]
+uri = "192.168.0.2"
 
 [[cameras]]
 uri = "192.168.0.3"
 
 [[cameras]]
 uri = "192.168.0.4"
-
-[[cameras]]
-uri = "192.168.0.5"

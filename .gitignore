@@ -9,3 +9,4 @@ yolo26n.pt
 dist/
 
 packages/
+image-harvester.toml
