@@ -70,7 +70,7 @@ def calculate_frames(frame_h: int, obj_h: list[int]) -> int:
 
 
 def make_request(endpoint: str, value: int) -> None:
-    if value > 0 and value < 9:
+    if value >= 0 and value <= 9:
         r_str = f"{endpoint}/move?band={value}"
         r = httpx.request("GET", url=r_str)
         logging.info(f"send request {r_str}")
