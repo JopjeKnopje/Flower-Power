@@ -26,6 +26,7 @@ dev = [
 [project.scripts]
 image-harvester = "image_harvester:harvester"
 ping-test = "image_harvester:ping"
+formula = "image_harvester:formula"
 
 
 [tool.uv.build-backend]
