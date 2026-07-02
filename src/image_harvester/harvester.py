@@ -214,9 +214,9 @@ def recording_path_find_part_id(dir_path: Path) -> int:
         no_suffix = f.with_suffix("").name
         part_id = int(no_suffix.split("-")[2])
 
-        if part_id > part_id_max:
-            part_id_max = part_id
-    return part_id_max + 1
+        if part_id >= part_id_max:
+            part_id_max = part_id + 1
+    return part_id_max
 
 
 def recording_get_path(dir_path: Path, cam_id: int) -> Path:
