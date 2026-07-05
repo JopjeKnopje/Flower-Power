@@ -6,7 +6,7 @@ import pytest
 from pytest import MonkeyPatch
 
 from image_harvester.config import Camera, Config
-from image_harvester.harvester import (
+from image_harvester.video import (
     VideoSource,
     VideoSourceRTP,
     VideoSourceURI,
