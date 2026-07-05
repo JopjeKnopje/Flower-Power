@@ -19,14 +19,15 @@ yolo_verbose = false
 
 # camera entry, this is a TOML list so you can add as many as you want (until we run out of memory lol)
 [[cameras]]
-# the IP address of the camera or a local filepath to a videofile
+# the IP address of the camera, a camera index or a local filepath to a videofile
 uri = "192.168.0.2"
 
 [[cameras]]
-uri = "192.168.0.3"
+uri = "/path/to/video.mp4"
 
 [[cameras]]
-uri = "192.168.0.4"
+# camera index (used for USB webcams etc)
+uri = 0
 
 # the following lines are optional and only valid when using anything other than a local filepath
 rstp_path = "/axis-media/media.amp"
