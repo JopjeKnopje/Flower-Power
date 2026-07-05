@@ -7,7 +7,7 @@ import time
 import httpx
 from queue import Empty, Queue
 from threading import Thread
-from typing import Callable, Self
+from typing import Callable
 
 import cv2
 from cv2.typing import MatLike
@@ -24,30 +24,54 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("httpx").propagate = False
 
 
-class VideoSource(str):
-    def __new__(cls, c: Camera) -> VideoSource:
+URIType = str | int
+
+
+@dataclass
+class VideoSource:
+    _uri: URIType
+
+    def __init__(self, uri: URIType) -> None:
+        self._uri = uri
+
+    @classmethod
+    def from_cfg_camera(cls, c: Camera) -> VideoSource:
         uri = c.get_uri()
-        if isinstance(uri, IPv4Address):
-            return VideoSourceRTP(uri, c.rstp_path, c.username, c.password)
-        return VideoSourceURI(uri)
+        if isinstance(uri, int):
+            return VideoSourceIndex(uri)
+        elif isinstance(uri, IPv4Address):
+            return VideoSourceRTP(
+                address=uri, path=c.rstp_path, username=c.username, password=c.password
+            )
+        else:
+            return VideoSourceURI(uri)
+
+    @property
+    def uri(self) -> URIType:
+        return self._uri
+
+
+class VideoSourceIndex(VideoSource):
+    def __init__(self, index: int) -> None:
+        VideoSource.__init__(self, uri=index)
 
 
 class VideoSourceURI(VideoSource):
-    def __new__(cls, path: str | pathlib.Path) -> Self:
+    def __init__(self, path: str | pathlib.Path) -> None:
         if isinstance(path, pathlib.Path):
             path = path.resolve().as_posix()
-        return str.__new__(cls, path)
+        VideoSource.__init__(self, uri=path)
 
 
 class VideoSourceRTP(VideoSource):
-    def __new__(
-        cls,
+    def __init__(
+        self,
         address: str | IPv4Address,
         path: str,
         username: str,
         password: str,
-    ) -> Self:
-        return str.__new__(cls, f"rtsp://{username}:{password}@{address}{path}")
+    ) -> None:
+        VideoSource.__init__(self, uri=f"rtsp://{username}:{password}@{address}{path}")
 
 
 # for some reason this stub file is not being found?
@@ -59,16 +83,16 @@ FPS = 30
 # bufferless VideoCapture: https://stackoverflow.com/a/54755738/7363348
 @dataclass
 class VideoStream:
-    _uri: VideoSource
+    _video_src: VideoSource
     _cap: cv2.VideoCapture
     _q: Queue[MatLike]
     _out_path: Path | None
     _writer: cv2.VideoWriter | None = None
 
     def __init__(self, uri: VideoSource, out_path: pathlib.Path | None = None) -> None:
-        self._uri = uri
+        self._video_src = uri
         self._out_path = out_path
-        self._cap = cv2.VideoCapture(self._uri)
+        self._cap = cv2.VideoCapture(self._video_src.uri)
         self._q = Queue()
         self._log("initializing ...")
 
@@ -77,11 +101,11 @@ class VideoStream:
                 self._out_path, FOURCC, FPS, (self.width, self.height)
             )
             self._log(
-                f"attached VideoWriter[{self._out_path}] to VideoStream {self._uri}"
+                f"attached VideoWriter[{self._out_path}] to VideoStream {self._video_src}"
             )
 
         if not self._cap.isOpened():
-            raise Exception(f"could not open URI {self._uri}")
+            raise Exception(f"could not open URI {self._video_src}")
 
         self._log(f"initialized, writing to {out_path}...")
         Thread(target=self._reader, daemon=True).start()
@@ -108,7 +132,7 @@ class VideoStream:
             self._q.put(frame)
 
     def _log(self, s: str, log_level: Callable[[str], None] = logging.info) -> None:
-        log_level(f"VideoStream[{self._uri}] {s}")
+        log_level(f"VideoStream[{self._video_src}] {s}")
 
     def release(self) -> None:
         if self._writer:
@@ -233,7 +257,8 @@ def harvester() -> None:
         writer_out_path = None
         if config.recording_dir:
             writer_out_path = recording_get_path(Path(f"{config.recording_dir}"), i)
-        streams.append(VideoStream(VideoSource(c), writer_out_path))
+        stream = VideoStream(VideoSource.from_cfg_camera(c), writer_out_path)
+        streams.append(stream)
 
     logger.info(f"connected to {len(streams)} cameras")
 

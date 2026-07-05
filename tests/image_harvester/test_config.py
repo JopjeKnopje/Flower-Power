@@ -71,8 +71,8 @@ def test_read_file(monkeypatch: MonkeyPatch, config_data: str) -> None:
 
 def test_create_source_rtp() -> None:
 
-    c = Camera("192.168.0.2", 1)
-    s = VideoSource(c)
+    c = Camera("192.168.0.2")
+    s = VideoSource.from_cfg_camera(c)
     assert isinstance(s, VideoSourceRTP)
 
 
@@ -80,14 +80,15 @@ def test_create_source_uri() -> None:
 
     filename = "text.txt"
 
-    c = Camera(filename, 1)
-    s = VideoSource(c)
+    c = Camera(filename)
+    s = VideoSource.from_cfg_camera(c)
 
     assert isinstance(s, VideoSourceURI)
-    assert s == f"{os.getcwd()}/{filename}"
+    assert s.uri == f"{os.getcwd()}/{filename}"
 
 
-@pytest.mark.xfail(reason="Camera may not be connected")
+# TODO: Add fixture which pings the camera, if the cameras are connected, return their addresses as a list
+@pytest.mark.skip(reason="Camera may not be connected")
 def test_create_streams() -> None:
     config = Config(
         flower_endpoint="192.168.0.42",
@@ -101,4 +102,4 @@ def test_create_streams() -> None:
     streams: list[VideoStream] = []
 
     for c in config.cameras:
-        streams.append(VideoStream(VideoSource(c)))
+        streams.append(VideoStream(VideoSource.from_cfg_camera(c)))

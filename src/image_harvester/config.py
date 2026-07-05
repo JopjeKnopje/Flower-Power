@@ -14,14 +14,16 @@ FLOWER_CONFIG_PATH = "image-harvester.toml"
 @dataclass
 class Camera:
     # TODO: Currently msgspec doens't support using `Path | IPv4Address` for this.
-    uri: str
+    uri: str | int
 
     rstp_path: str = "/axis-media/media.amp"
     username: str = "root"
     password: str = "admin"
 
     # dirty trick, we just parse at runtime
-    def get_uri(self) -> Path | IPv4Address:
+    def get_uri(self) -> Path | IPv4Address | int:
+        if isinstance(self.uri, int):
+            return self.uri
         try:
             return IPv4Address(self.uri)
         except AddressValueError:
