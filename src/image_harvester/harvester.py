@@ -131,10 +131,15 @@ def harvester() -> None:
     if not viewport.is_open():
         print("error viewport not open")
 
+    logger.info("viewport created")
+
     time_old = time.time() + config.flower_interval
 
     # Load the YOLO26 model
-    model = YOLO("yolo26n.pt")
+    model_path = "yolo26n.pt"
+    logger.info(f"loading model {model_path}")
+    model = YOLO(model=model_path)
+    logger.info(f"done model {model_path}")
 
     # Loop through the video frames
     while viewport.is_open():
