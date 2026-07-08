@@ -6,6 +6,7 @@ import httpx
 
 import cv2
 from cv2.typing import MatLike
+from torch import export
 from ultralytics import YOLO
 from pathlib import Path
 
@@ -138,8 +139,12 @@ def harvester() -> None:
     # Load the YOLO26 model
     model_path = "yolo26n.pt"
     logger.info(f"loading model {model_path}")
-    model = YOLO(model=model_path)
-    logger.info(f"done model {model_path}")
+    _ = YOLO(model=model_path).export(format="ncnn")
+    exported_model_path = "yolo26n_ncnn_model"
+
+    model = YOLO(exported_model_path)
+
+    logger.info(f"done model {model_path} -> {exported_model_path}")
 
     # Loop through the video frames
     while viewport.is_open():
