@@ -157,42 +157,10 @@ def harvester() -> None:
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
         logger.info("calling model.track")
         result = model.track(
-            frame, verbose=config.yolo_verbose, persist=True, classes=[0]
-        )[0]
+            frame, verbose=config.yolo_verbose
+        )
         logger.info("done calling model.track")
 
-        # Get the boxes and track IDs
-        if result.boxes and result.boxes.is_track:
-            boxes = result.boxes.xywh.cpu()
-            boxes_cls = result.boxes.cls.cpu()
-            track_ids = result.boxes.id.int().cpu().tolist()
-
-            for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
-                x, y, w, h = box
-                if model.names[int(box_cls)] != "person":
-                    continue
-                object_diagonal = h
-                tracked_objects.append(int(object_diagonal))
-
-            # Visualize the result on the frame
-            frame = result.plot()
-        height, width, _ = frame.shape
-        # TODO Get from camera property
-
-        # Display the annotated frame
-        # cv2.imshow(f"Flower Power @ {width}x{height}", frame)
-
-        value = calculate_frames(height, tracked_objects)
-
-        # TODO: Replace this really dirty time
-        delta = time.time() - time_old
-        if delta > config.flower_interval:
-            make_request(config.flower_endpoint, value)
-            time_old = time.time()
-
-        # Break the loop if 'q' is pressed
-        # if cv2.waitKey(1) & 0xFF == ord("q"):
-        #     break
 
     # Release the video capture object and close the display window
     # TODO: Close video caps
