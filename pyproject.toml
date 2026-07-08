@@ -9,10 +9,13 @@ authors = [
 requires-python = ">=3.13"
 
 dependencies = [
-    "torch==2.11.0+cu126 ; sys_platform != 'darwin'",
-    "torch ; sys_platform == 'darwin'",
-    "torchvision==0.26.0 ; sys_platform != 'darwin'",
+    "torch==2.11.0+cu126 ; sys_platform == 'linux'",
+    "torch==2.11.0; sys_platform == 'darwin'",
+    "torch==2.11.0; sys_platform == 'aarch64'",
+    "torchvision==0.26.0 ; sys_platform == 'linux'",
+    "torchvision==0.26.0 ; sys_platform == 'aarch64'",
     "torchvision ; sys_platform == 'darwin'",
+
     "msgspec>=0.21.1",
     "pillow>=12.2.0",
     "ultralytics>=8.4.51",
