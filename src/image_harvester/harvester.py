@@ -57,14 +57,14 @@ def calculate_frames(frame_h: int, obj_h: list[int]) -> int:
     for o in obj_h:
         # higher = closer
         ratio = 1 - (frame_h - o) / frame_h
-        logger.info(f"frame {ratio}")
+        # logger.info(f"frame {ratio}")
         if ratio > close_threshold:
             close_count += 2
         else:
             away_count += 1
 
     value = int(close_count + away_count)
-    logger.info(f"value {value} close_count {close_count} away_count {away_count}")
+    # logger.info(f"value {value} close_count {close_count} away_count {away_count}")
 
     return value
 
@@ -131,10 +131,14 @@ def harvester() -> None:
     if not viewport.is_open():
         print("error viewport not open")
 
+    logger.info("viewport created")
+
     time_old = time.time() + config.flower_interval
 
     # Load the YOLO26 model
-    model = YOLO("yolo26n.pt")
+    model_path = "yolo26n.pt"
+    model = YOLO(model_path)
+    logger.info(f"done model {model_path}")
 
     # Loop through the video frames
     while viewport.is_open():
@@ -143,6 +147,8 @@ def harvester() -> None:
         except Exception as e:
             logger.error(e)
             continue
+
+        # logger.info("read from viewport")
 
         tracked_objects: list[int] = []
 
@@ -166,26 +172,25 @@ def harvester() -> None:
                 tracked_objects.append(int(object_diagonal))
 
             # Visualize the result on the frame
-            frame = result.plot()
+            # frame = result.plot()
         height, width, _ = frame.shape
         # TODO Get from camera property
 
         # Display the annotated frame
-        cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+        # cv2.imshow(f"Flower Power @ {width}x{height}", frame)
 
         value = calculate_frames(height, tracked_objects)
 
         # TODO: Replace this really dirty time
         delta = time.time() - time_old
         if delta > config.flower_interval:
-            make_request(config.flower_endpoint, value)
+            # make_request(config.flower_endpoint, value)
             time_old = time.time()
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
-    # Release the video capture object and close the display window
     # TODO: Close video caps
     viewport.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
