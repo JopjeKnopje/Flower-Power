@@ -97,6 +97,7 @@ Set the password to `admin`
 
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
+- [pyproject.toml - environment markers](https://packaging.python.org/en/latest/specifications/dependency-specifiers/)
 - [yolo - python docx](https://docs.ultralytics.com/usage/python)
 - [what are tensors](https://medium.com/@payalparida_datascientist/why-tensors-are-essential-in-ml-dl-3fdd12365bca)
 - [uv project structure](https://stackoverflow.com/a/79817200/7363348)
