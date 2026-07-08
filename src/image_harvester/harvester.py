@@ -181,7 +181,7 @@ def harvester() -> None:
         # TODO Get from camera property
 
         # Display the annotated frame
-        cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+        # cv2.imshow(f"Flower Power @ {width}x{height}", frame)
 
         value = calculate_frames(height, tracked_objects)
 
@@ -192,8 +192,8 @@ def harvester() -> None:
             time_old = time.time()
 
         # Break the loop if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        # if cv2.waitKey(1) & 0xFF == ord("q"):
+        #     break
 
     # Release the video capture object and close the display window
     # TODO: Close video caps
