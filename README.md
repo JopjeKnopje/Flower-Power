@@ -95,6 +95,28 @@ Set the password to `admin`
 - Do 2 builds/modes?, one for x86_64 and the other for ARM64
 - `value = math.tanh(1 * math.pi / 2)  * 10`
 
+## Weird nvidia fix
+`torch==2.11.0` adds a bunch of nvidia packages, even when running on aarch64 (which doesn't hava GPU lol)
+I "fixed" this by running `torch==2.6.0`. I still have to figure out why this is being added
+When running `2.11.0` we get illegal instruction, probablyt because it calls to an nvidia cuda binary which we cannot execute ofc.
+Lets `strace` that
+
+
+When we strace `2.11.0` we can see its looking for 
+```bash
+openat(AT_FDCWD, "/home/pi/rpi-object-detection/venv/lib/python3.13/site-packages/torch/lib/../../nvidia/cudnn/lib/libcuda.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/home/pi/rpi-object-detection/venv/lib/python3.13/site-packages/torch/lib/../../nvidia/nvshmem/lib/libcuda.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/home/pi/rpi-object-detection/venv/lib/python3.13/site-packages/torch/lib/../../nvidia/nccl/lib/libcuda.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/home/pi/rpi-object-detection/venv/lib/python3.13/site-packages/torch/lib/../../nvidia/cusparselt/lib/libcuda.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/home/pi/rpi-object-detection/venv/lib/python3.13/site-packages/torch/lib/../../nvidia/cu13/lib/libcuda.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/home/pi/rpi-object-detection/venv/lib/python3.13/site-packages/torch/lib/libcuda.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or dir
+```
+
+
+When we strace `2.6.0`, `libcuda` is not even mentioned
+
+2.9 also works
+
 ## Resources
 - [pyproject.toml - dependency version syntax](https://stackoverflow.com/questions/54720072/dependency-version-syntax-for-python-poetry)
 - [pyproject.toml - environment markers](https://packaging.python.org/en/latest/specifications/dependency-specifiers/)
