@@ -114,6 +114,17 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
 
 
 def harvester() -> None:
+    model_path = "yolo26n.pt"
+    model = YOLO(model_path)
+
+    logger.info("loaded model")
+    logger.info("starting track")
+    results = model.track("https://youtu.be/LNwODJXcvt4", show=True)  # Tracking with default tracker
+    logger.info("track done")
+    print(results)
+
+
+def harvester1() -> None:
     config = Config.read()
     streams: list[VideoStream] = []
 
