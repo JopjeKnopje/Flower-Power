@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import logging
+import os
+from platform import system
 import time
 import httpx
 
@@ -114,16 +116,30 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
 
 
 def harvester() -> None:
+
+    cap = cv2.VideoCapture("/home/joppe/Stuff/Programming/Flower-Power/sample_recordings/cam-0-29.avi")
+
+    if not cap.isOpened():
+        print("cap failed")
+        exit(1)
+
     model_path = "yolo26n.pt"
+    print("loaded model")
     model = YOLO(model_path)
 
-    logger.info("loaded model")
-    logger.info("starting track")
-    results = model.track(
-        "https://youtu.be/LNwODJXcvt4", show=False
-    )  # Tracking with default tracker
-    logger.info("track done")
-    print(results)
+    print("starting track")
+    while cap.isOpened():
+        print("reading")
+        success, frame = cap.read()
+        print("read from viewport")
+
+        tracked_objects: list[int] = []
+
+        # Run YOLO26 tracking on the frame, persisting tracks between frames
+        # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
+        print("calling model.track")
+        result = model.track(frame, verbose=True)
+        print("done calling model.track")
 
 
 def harvester1() -> None:
