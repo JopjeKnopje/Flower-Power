@@ -117,7 +117,7 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
 
 def harvester() -> None:
 
-    cap = cv2.VideoCapture("/home/joppe/Stuff/Programming/Flower-Power/sample_recordings/cam-0-29.avi")
+    cap = cv2.VideoCapture("sample_recordings/cam-0-29.avi")
 
     if not cap.isOpened():
         print("cap failed")
