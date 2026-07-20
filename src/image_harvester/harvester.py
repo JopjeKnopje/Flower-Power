@@ -114,34 +114,8 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
 
 
 
+
 def harvester() -> None:
-
-    cap = cv2.VideoCapture("sample_recordings/cam-0-29.avi")
-
-    if not cap.isOpened():
-        print("cap failed")
-        exit(1)
-
-    model_path = "yolo26n.pt"
-    print("loaded model")
-    model = YOLO(model_path)
-
-    print("starting track")
-    while cap.isOpened():
-        print("reading")
-        success, frame = cap.read()
-        print("read from viewport")
-
-        tracked_objects: list[int] = []
-
-        # Run YOLO26 tracking on the frame, persisting tracks between frames
-        # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        print("calling model.track")
-        result = model.track(frame, verbose=True)
-        print("done calling model.track")
-
-
-def harvester1() -> None:
     config = Config.read()
     streams: list[VideoStream] = []
 
