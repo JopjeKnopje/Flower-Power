@@ -78,6 +78,7 @@ Set the password to `admin`
 
 
 ## Todo V2
+- See if we EVEN NEED this cuda lib `python -c "import torch; print(torch.cuda.is_available())"`
 - Add `cam_id` to config file, also check that there are no duplicates
 - Add support to the `Config` for using linux video devices indentified by a number e.g `cv2.VideoCapture(0)`
 - Ping tool also pings flower endpoint lol
