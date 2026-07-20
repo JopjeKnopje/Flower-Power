@@ -1,8 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import logging
-import os
-from platform import system
 import time
 import httpx
 
@@ -113,6 +111,7 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
     dir_path.mkdir(exist_ok=True)
     part_id = recording_path_find_part_id(dir_path)
     return dir_path.joinpath(Path(recording_path_file_name(cam_id, part_id)))
+
 
 
 def harvester() -> None:
