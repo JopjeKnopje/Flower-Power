@@ -57,14 +57,14 @@ def calculate_frames(frame_h: int, obj_h: list[int]) -> int:
     for o in obj_h:
         # higher = closer
         ratio = 1 - (frame_h - o) / frame_h
-        logger.info(f"frame {ratio}")
+        # logger.info(f"frame {ratio}")
         if ratio > close_threshold:
             close_count += 2
         else:
             away_count += 1
 
     value = int(close_count + away_count)
-    logger.info(f"value {value} close_count {close_count} away_count {away_count}")
+    # logger.info(f"value {value} close_count {close_count} away_count {away_count}")
 
     return value
 
@@ -150,15 +150,48 @@ def harvester() -> None:
             logger.error(e)
             continue
 
-        logger.info("read from viewport")
+        # logger.info("read from viewport")
 
         tracked_objects: list[int] = []
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        result = model.track(frame, verbose=config.yolo_verbose)
+        result = model.track(frame, verbose=config.yolo_verbose, persist=True, classes=[0])[0]
 
-    # Release the video capture object and close the display window
+
+        # Get the boxes and track IDs
+        if result.boxes and result.boxes.is_track:
+            boxes = result.boxes.xywh.cpu()
+            boxes_cls = result.boxes.cls.cpu()
+            track_ids = result.boxes.id.int().cpu().tolist()
+
+            for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
+                x, y, w, h = box
+                if model.names[int(box_cls)] != "person":
+                    continue
+                object_diagonal = h
+                tracked_objects.append(int(object_diagonal))
+
+            # Visualize the result on the frame
+            frame = result.plot()
+        height, width, _ = frame.shape
+        # TODO Get from camera property
+
+        # Display the annotated frame
+        cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+
+        value = calculate_frames(height, tracked_objects)
+
+        # TODO: Replace this really dirty time
+        delta = time.time() - time_old
+        if delta > config.flower_interval:
+            # make_request(config.flower_endpoint, value)
+            time_old = time.time()
+
+        # Break the loop if 'q' is pressed
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
     # TODO: Close video caps
     viewport.release()
     cv2.destroyAllWindows()
