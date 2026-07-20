@@ -140,7 +140,6 @@ def harvester() -> None:
     # Load the YOLO26 model
     model_path = "yolo26n.pt"
     model = YOLO(model_path)
-
     logger.info(f"done model {model_path}")
 
     # Loop through the video frames
@@ -157,9 +156,7 @@ def harvester() -> None:
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        logger.info("calling model.track")
         result = model.track(frame, verbose=config.yolo_verbose)
-        logger.info("done calling model.track")
 
     # Release the video capture object and close the display window
     # TODO: Close video caps
