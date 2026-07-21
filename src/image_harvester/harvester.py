@@ -113,8 +113,6 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
     return dir_path.joinpath(Path(recording_path_file_name(cam_id, part_id)))
 
 
-
-
 def harvester() -> None:
     config = Config.read()
     streams: list[VideoStream] = []
@@ -156,8 +154,9 @@ def harvester() -> None:
 
         # Run YOLO26 tracking on the frame, persisting tracks between frames
         # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        result = model.track(frame, verbose=config.yolo_verbose, persist=True, classes=[0])[0]
-
+        result = model.track(
+            frame, verbose=config.yolo_verbose, persist=True, classes=[0]
+        )[0]
 
         # Get the boxes and track IDs
         if result.boxes and result.boxes.is_track:
@@ -173,12 +172,12 @@ def harvester() -> None:
                 tracked_objects.append(int(object_diagonal))
 
             # Visualize the result on the frame
-            frame = result.plot()
+            # frame = result.plot()
         height, width, _ = frame.shape
         # TODO Get from camera property
 
         # Display the annotated frame
-        cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+        # cv2.imshow(f"Flower Power @ {width}x{height}", frame)
 
         value = calculate_frames(height, tracked_objects)
 
@@ -194,4 +193,4 @@ def harvester() -> None:
 
     # TODO: Close video caps
     viewport.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
