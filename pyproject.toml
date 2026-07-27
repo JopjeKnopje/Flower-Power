@@ -31,9 +31,10 @@ dev = [
 ]
 
 [project.scripts]
-image-harvester = "image_harvester:harvester"
+image-harvester = "image_harvester:main"
 ping-test = "image_harvester:ping"
 formula = "image_harvester:formula"
+mock-controller = "mock_controller:main"
 
 
 [tool.uv.build-backend]

@@ -1,13 +1,18 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import logging
+import platform
+import sys
 import time
+from typing import Callable, Literal
 import httpx
 
 import cv2
 from cv2.typing import MatLike
 from ultralytics import YOLO
 from pathlib import Path
+
+from ultralytics.engine.results import Boxes
 
 from image_harvester.config import Config
 from image_harvester.logger import logger_init
@@ -113,84 +118,124 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
     return dir_path.joinpath(Path(recording_path_file_name(cam_id, part_id)))
 
 
-def harvester() -> None:
+
+def host_is_headless() -> bool:
+    # when we're running on rpi its headless
+    return sys.platform == 'linux' or platform.machine == 'aarch64'
+
+
+
+class Harvester:
+    def __init__(self, config: Config) -> None:
+        self._config: Config = config
+
+        self._viewport: JointViewport = JointViewport(self._init_streams(config))
+        if not self._viewport.is_open():
+            print("error viewport not open")
+        else:
+            logger.info("viewport created")
+
+        # Load the YOLO26 model
+        model_path = "yolo26n.pt"
+        self._model: YOLO = YOLO(model_path)
+        logger.info(f"done loading model {model_path}")
+
+
+
+    def _init_streams(self, cfg: Config) -> list[VideoStream]:
+        streams: list[VideoStream] = []
+
+        for i, c in enumerate(cfg.cameras):
+            writer_out_path = None
+            if cfg.recording_dir:
+                writer_out_path = recording_get_path(Path(f"{cfg.recording_dir}"), i)
+            video_src = VideoSource.from_cfg_camera(c)
+            stream = VideoStream(video_src, writer_out_path)
+            streams.append(stream)
+
+        logger.info(f"connected to {len(streams)} cameras")
+        return streams
+
+    def loop(self, process_cb: Callable[[Boxes], None], yolo_device: Literal["cpu", "cuda"] = "cuda") -> None:
+
+        while self._viewport.is_open():
+            try:
+                frame = self._viewport.read()
+            except Exception as e:
+                logger.error(e)
+                continue
+            # TODO: set cpu option based on cli parameter
+            result = self._model.track(
+                frame, verbose=self._config.yolo_verbose, persist=True, classes=[0], device=yolo_device
+            )[0]
+
+            # Get the boxes and track IDs
+            if result.boxes and result.boxes.is_track:
+                boxes = result.boxes.xywh.cpu()
+                # TODO: REmove boxes_cls since we already know we're just checking for a person, when we set `classes=[0]`
+                boxes_cls = result.boxes.cls.cpu()
+                track_ids = result.boxes.id.int().cpu().tolist()
+
+                process_cb(boxes)
+
+                # for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
+                #     x, y, w, h = box
+                #     if model.names[int(box_cls)] != "person":
+                #         continue
+                #     object_diagonal = h
+                #     tracked_objects.append(int(object_diagonal))
+
+                # Visualize the result on the frame
+                frame = result.plot()
+            height, width, _ = frame.shape
+            # TODO Get from camera property
+
+            # Display the annotated frame
+            cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+
+            # value = calculate_frames(height, tracked_objects)
+
+            # # TODO: Replace this really dirty time
+            # delta = time.time() - time_old
+            # if delta > config.flower_interval:
+            #     # make_request(config.flower_endpoint, value)
+            #     time_old = time.time()
+
+            # Break the loop if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+        self._viewport.release()
+
+
+
+class Processor:
+    # this should potentially take a web-requestor to talk to the flower.
+    def __init__(self) -> None:
+        # self.boxes: list[Any] = []
+        ...
+
+    @classmethod
+    def process_frame_cb(cls, boxes: Boxes) -> None:
+        logger.info("called callback")
+
+
+
+def main() -> None:
+
     config = Config.read()
-    streams: list[VideoStream] = []
+    print(config)
+    harvester = Harvester(Config.read())
 
-    for i, c in enumerate(config.cameras):
-        writer_out_path = None
-        if config.recording_dir:
-            writer_out_path = recording_get_path(Path(f"{config.recording_dir}"), i)
-        stream = VideoStream(VideoSource.from_cfg_camera(c), writer_out_path)
-        streams.append(stream)
+    prc = Processor
 
-    logger.info(f"connected to {len(streams)} cameras")
+    harvester.loop(prc.process_frame_cb, yolo_device="cuda")
 
-    viewport = JointViewport(streams)
 
-    if not viewport.is_open():
-        print("error viewport not open")
 
-    logger.info("viewport created")
 
-    time_old = time.time() + config.flower_interval
+    # time_old = time.time() + config.flower_interval
 
-    # Load the YOLO26 model
-    model_path = "yolo26n.pt"
-    model = YOLO(model_path)
-    logger.info(f"done model {model_path}")
 
-    # Loop through the video frames
-    while viewport.is_open():
-        try:
-            frame = viewport.read()
-        except Exception as e:
-            logger.error(e)
-            continue
-
-        # logger.info("read from viewport")
-
-        tracked_objects: list[int] = []
-
-        # Run YOLO26 tracking on the frame, persisting tracks between frames
-        # TODO: read about `classes=[0]`, it does however tell the model to only detect humans.
-        result = model.track(
-            frame, verbose=config.yolo_verbose, persist=True, classes=[0]
-        )[0]
-
-        # Get the boxes and track IDs
-        if result.boxes and result.boxes.is_track:
-            boxes = result.boxes.xywh.cpu()
-            boxes_cls = result.boxes.cls.cpu()
-            track_ids = result.boxes.id.int().cpu().tolist()
-
-            for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
-                x, y, w, h = box
-                if model.names[int(box_cls)] != "person":
-                    continue
-                object_diagonal = h
-                tracked_objects.append(int(object_diagonal))
-
-            # Visualize the result on the frame
-            # frame = result.plot()
-        height, width, _ = frame.shape
-        # TODO Get from camera property
-
-        # Display the annotated frame
-        # cv2.imshow(f"Flower Power @ {width}x{height}", frame)
-
-        value = calculate_frames(height, tracked_objects)
-
-        # TODO: Replace this really dirty time
-        delta = time.time() - time_old
-        if delta > config.flower_interval:
-            # make_request(config.flower_endpoint, value)
-            time_old = time.time()
-
-        # Break the loop if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
 
     # TODO: Close video caps
-    viewport.release()
     # cv2.destroyAllWindows()
