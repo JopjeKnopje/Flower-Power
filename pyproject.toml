@@ -34,6 +34,7 @@ dev = [
 image-harvester = "image_harvester:harvester"
 ping-test = "image_harvester:ping"
 formula = "image_harvester:formula"
+mock-controller = "mock_controller:main"
 
 
 [tool.uv.build-backend]
