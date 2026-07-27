@@ -56,7 +56,15 @@ You should now be able to reach the camera (and any other devices on that networ
 
 
 
+
+
 ## Troubleshooting
+### Check if running cuda
+
+```bash
+uv run python -c "import torch; print(torch.cuda.is_available())"
+```
+
 ### Camera unreachable
 If for some reason the image-harvester won't connect to the camera(s)
 
@@ -78,7 +86,6 @@ Set the password to `admin`
 
 
 ## Todo V2
-- See if we EVEN NEED this cuda lib `python -c "import torch; print(torch.cuda.is_available())"`
 - Add `cam_id` to config file, also check that there are no duplicates
 - Add support to the `Config` for using linux video devices indentified by a number e.g `cv2.VideoCapture(0)`
 - Ping tool also pings flower endpoint lol

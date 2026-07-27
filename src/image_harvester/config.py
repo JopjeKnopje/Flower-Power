@@ -5,9 +5,12 @@ from pathlib import Path
 import pathlib
 from typing import Self
 import msgspec
+from image_harvester.logger import logger_init
 
+logger = logger_init()
 
 FLOWER_CONFIG_PATH = "image-harvester.toml"
+
 
 
 # TODO: Think about video recording location
@@ -52,7 +55,9 @@ class Config:
         if file is None:
             file = pathlib.Path(os.getenv("FLOWER_CONFIG_PATH", FLOWER_CONFIG_PATH))
         with open(file, "r") as f:
-            return cls.parse(f.read())
+            cfg = cls.parse(f.read())
+            logger.info(f"successfully parsed config file {FLOWER_CONFIG_PATH}")
+            return cfg
 
     @classmethod
     def parse(cls, data: str) -> Self:

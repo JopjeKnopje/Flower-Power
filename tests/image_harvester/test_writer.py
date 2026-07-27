@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 
 from pathlib import Path
+from typing import Self
 
 
 from image_harvester.harvester import (
@@ -40,3 +41,28 @@ def test_find_new_path_part_no_files() -> None:
 
     part_max = recording_path_find_part_id(tmp_dir)
     assert part_max == 0
+
+
+class StaticCounter:
+    score: int = 0
+    def __init__(self) -> None:
+        # instance
+        StaticCounter.score = 10
+
+    @classmethod
+    def count(cls) -> None:
+        cls.score += 1
+
+    def get_score(self) -> int:
+        return self.score
+
+
+
+def test_static_counter() -> None:
+    c = StaticCounter()
+
+    assert c.score == 10
+    c.count()
+    c.count()
+    assert c.score == 12
+    assert c.get_score() == 12
