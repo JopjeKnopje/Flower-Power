@@ -86,22 +86,23 @@ Set the password to `admin`
 
 
 ## Todo V2
-- Add `cam_id` to config file, also check that there are no duplicates
-- Add support to the `Config` for using linux video devices indentified by a number e.g `cv2.VideoCapture(0)`
-- Ping tool also pings flower endpoint lol
-- Tweak model (set minimum confidence score threshold in config file?)
-- Send out a status check to the hydraulic controller at the same time it connects with the cameras to make sure its online
-- Set it up on a RPI (ansible? or some other iac tool) and write setup instructions for that.
-- Container to keep track of all the file recording stuff, such as the filepath.
-- Script to do initial setup of the cameras.
-- Add threading while connecting to the cameras.
-- Benchmark yolo runs and image stitching parts of the program
-- fix hconcat
-- Wait for all cameras in feed to come online with a set timeout, also when camera goes offline log it. But keep going
-- Check the camera resolution
-- Increase yolo resolution?
-- Do 2 builds/modes?, one for x86_64 and the other for ARM64
-- `value = math.tanh(1 * math.pi / 2)  * 10`
+- [ ] Think about design pattern so we can inject behaviour in our loop regarding running headless.
+- [ ] Add `cam_id` to config file, also check that there are no duplicates
+- [ ] Add support to the `Config` for using linux video devices indentified by a number e.g `cv2.VideoCapture(0)`
+- [ ] Ping tool also pings flower endpoint lol
+- [ ] Tweak model (set minimum confidence score threshold in config file?)
+- [ ] Send out a status check to the hydraulic controller at the same time it connects with the cameras to make sure its online
+- [ ] Set it up on a RPI (ansible? or some other iac tool) and write setup instructions for that.
+- [ ] Container to keep track of all the file recording stuff, such as the filepath.
+- [ ] Script to do initial setup of the cameras.
+- [ ] Add threading while connecting to the cameras.
+- [ ] Benchmark yolo runs and image stitching parts of the program
+- [ ] fix hconcat
+- [ ] Wait for all cameras in feed to come online with a set timeout, also when camera goes offline log it. But keep going
+- [ ] Check the camera resolution
+- [ ] Increase yolo resolution?
+- [ ] Do 2 builds/modes?, one for x86_64 and the other for ARM64
+- [ ] `value = math.tanh(1 * math.pi / 2)  * 10`
 
 ## Weird nvidia fix
 `torch==2.11.0` adds a bunch of nvidia packages, even when running on aarch64 (which doesn't hava GPU lol)

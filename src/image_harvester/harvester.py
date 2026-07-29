@@ -121,6 +121,7 @@ class Harvester:
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:
+        logger.info(f"starting yolo loop on device {yolo_device}")
         while self._viewport.is_open():
             try:
                 frame = self._viewport.read()
@@ -147,12 +148,12 @@ class Harvester:
                 if isinstance(boxes, Tensor):
                     callback(boxes)
 
-                # Visualize the result on the frame
-                frame = result.plot()
-                height, width, _ = frame.shape
-
                 # Display the annotated frame
                 if not headless:
+                    # Visualize the result on the frame
+                    frame = result.plot()
+                    height, width, _ = frame.shape
+
                     cv2.imshow(f"Flower Power @ {width}x{height}", frame)
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
