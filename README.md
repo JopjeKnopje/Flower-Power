@@ -86,6 +86,7 @@ Set the password to `admin`
 
 
 ## Todo V2
+- [ ] Add seek to video playback
 - [ ] Think about design pattern so we can inject behaviour in our loop regarding running headless.
 - [ ] Add `cam_id` to config file, also check that there are no duplicates
 - [ ] Add support to the `Config` for using linux video devices indentified by a number e.g `cv2.VideoCapture(0)`
