@@ -3,7 +3,8 @@
 .ruff_cache/
 
 test-vids/
-*.avi
+sample_recordings/
+sample_recordings_fr/
 # don't wanna commit that UNIT
 yolo26n.pt
 dist/
