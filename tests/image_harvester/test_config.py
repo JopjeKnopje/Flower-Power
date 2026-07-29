@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from ipaddress import IPv4Address
 import os
 import pathlib
@@ -103,3 +104,37 @@ def test_create_streams() -> None:
 
     for c in config.cameras:
         streams.append(VideoStream(VideoSource.from_cfg_camera(c)))
+
+
+
+def test_dataclass_static() -> None:
+
+    @dataclass
+    class StorageData:
+        value: int
+        def __init__(self) -> None:
+            self.value = 321
+
+    @dataclass
+    class StorageDataNoInit:
+        value: int
+
+
+    class StorageReg:
+        value: int
+        def __init__(self) -> None:
+            self.value = 321
+
+    sd = StorageData()
+    assert sd.value == 321
+    # assert StorageData.value == 123
+
+    sdni = StorageDataNoInit(321)
+    assert sdni.value == 321
+    # assert StorageData.value == 123
+
+
+    sr = StorageReg()
+    assert sr.value == 321
+    # assert StorageReg.value == 123
+
