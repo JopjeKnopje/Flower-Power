@@ -10,7 +10,7 @@ from image_harvester.config import Camera, Config
 from image_harvester.video import (
     VideoSource,
     VideoSourceRTP,
-    VideoSourceURI,
+    VideoSourceLocalPath,
     VideoStream,
 )
 
@@ -84,7 +84,7 @@ def test_create_source_uri() -> None:
     c = Camera(filename)
     s = VideoSource.from_cfg_camera(c)
 
-    assert isinstance(s, VideoSourceURI)
+    assert isinstance(s, VideoSourceLocalPath)
     assert s.uri == f"{os.getcwd()}/{filename}"
 
 
@@ -106,12 +106,12 @@ def test_create_streams() -> None:
         streams.append(VideoStream(VideoSource.from_cfg_camera(c)))
 
 
-
 def test_dataclass_static() -> None:
 
     @dataclass
     class StorageData:
         value: int
+
         def __init__(self) -> None:
             self.value = 321
 
@@ -119,9 +119,9 @@ def test_dataclass_static() -> None:
     class StorageDataNoInit:
         value: int
 
-
     class StorageReg:
         value: int
+
         def __init__(self) -> None:
             self.value = 321
 
@@ -133,8 +133,6 @@ def test_dataclass_static() -> None:
     assert sdni.value == 321
     # assert StorageData.value == 123
 
-
     sr = StorageReg()
     assert sr.value == 321
     # assert StorageReg.value == 123
-
