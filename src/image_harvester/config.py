@@ -5,12 +5,11 @@ from pathlib import Path
 import pathlib
 from typing import Self
 import msgspec
-from image_harvester.logger import logger_init
+from image_harvester.logging import logger_init
 
 logger = logger_init()
 
 FLOWER_CONFIG_PATH = "image-harvester.toml"
-
 
 
 # TODO: Think about video recording location
