@@ -129,7 +129,7 @@ class Harvester:
                 logger.error(e)
                 continue
             # TODO: set cpu option based on cli parameter
-            result = self._model.track(
+            result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
                 frame,
                 verbose=self._config.yolo_verbose,
                 persist=True,
@@ -139,10 +139,9 @@ class Harvester:
 
             # Get the boxes and track IDs
             if result.boxes and result.boxes.is_track:
-                boxes = result.boxes.xywh.cpu()
-                # TODO: Remove boxes_cls since we already know we're just checking for a person, when we set `classes=[0]`
-                boxes_cls = result.boxes.cls.cpu()
-                track_ids = result.boxes.id.int().cpu().tolist()
+                boxes = result.boxes.xywh.cpu()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
+                _ = result.boxes.cls.cpu()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+                _ = result.boxes.id.int().cpu().tolist()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportOptionalMemberAccess, reportUnknownVariableType]
 
                 # TODO: Measure time it takes to call isinstance
                 if isinstance(boxes, Tensor):
@@ -152,7 +151,7 @@ class Harvester:
             if not headless:
                 # Visualize the result on the frame
                 frame = result.plot()
-                height, width, _ = frame.shape
+                height, width, _ = frame.shape  # pyright: ignore[reportAny]
 
                 cv2.imshow(f"Flower Power @ {width}x{height}", frame)
                 if cv2.waitKey(1) & 0xFF == ord("q"):
