@@ -148,15 +148,15 @@ class Harvester:
                 if isinstance(boxes, Tensor):
                     callback(boxes)
 
-                # Display the annotated frame
-                if not headless:
-                    # Visualize the result on the frame
-                    frame = result.plot()
-                    height, width, _ = frame.shape
+            # Display the annotated frame
+            if not headless:
+                # Visualize the result on the frame
+                frame = result.plot()
+                height, width, _ = frame.shape
 
-                    cv2.imshow(f"Flower Power @ {width}x{height}", frame)
-                    if cv2.waitKey(1) & 0xFF == ord("q"):
-                        break
+                cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
         self._viewport.release()
         if not headless:
             cv2.destroyAllWindows()
