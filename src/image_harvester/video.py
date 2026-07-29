@@ -6,6 +6,7 @@ from ipaddress import IPv4Address
 from pathlib import Path
 from queue import Empty, Queue
 from threading import Thread
+import time
 from typing import Callable
 
 import cv2
@@ -33,7 +34,7 @@ class VideoSource:
                 address=uri, path=c.rstp_path, username=c.username, password=c.password
             )
         else:
-            return VideoSourceURI(uri)
+            return VideoSourceLocalPath(uri)
 
     @property
     def uri(self) -> URIType:
@@ -45,7 +46,7 @@ class VideoSourceIndex(VideoSource):
         VideoSource.__init__(self, uri=index)
 
 
-class VideoSourceURI(VideoSource):
+class VideoSourceLocalPath(VideoSource):
     def __init__(self, path: str | Path) -> None:
         if isinstance(path, Path):
             path = path.resolve().as_posix()
@@ -72,12 +73,14 @@ class WriterConfig:
 
 # bufferless VideoCapture: https://stackoverflow.com/a/54755738/7363348
 @dataclass
+# TODO: Implement a simple `VideoStream` for just playing back a video, without any threading. Inherit from it and add threading
 class VideoStream:
     _video_src: VideoSource
     _cap: cv2.VideoCapture
     _q: Queue[MatLike]
     _out_path: Path | None
     _writer: cv2.VideoWriter | None = None
+    _lock_fps: bool = False
 
     def __init__(self, uri: VideoSource, out_path: Path | None = None) -> None:
         self._video_src = uri
@@ -85,6 +88,9 @@ class VideoStream:
         self._cap = cv2.VideoCapture(self._video_src.uri)
         self._q = Queue()
         self._log("initializing ...")
+
+        if isinstance(uri, VideoSourceLocalPath):
+            self._lock_fps = True
 
         if self._out_path is not None:
             self._writer = cv2.VideoWriter(
@@ -123,6 +129,9 @@ class VideoStream:
                 except Empty:
                     pass
             self._q.put(frame)
+            # dirty trick to fix video playback.
+            if self._lock_fps:
+                time.sleep(0.033)
 
     def _log(self, s: str, log_level: Callable[[str], None] = logging.info) -> None:
         log_level(f"VideoStream[{self._video_src}] {s}")
