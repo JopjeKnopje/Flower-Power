@@ -6,3 +6,6 @@ yolo_verbose = true
 
 [[cameras]]
 uri = "192.168.1.2"
+
+[[cameras]]
+uri = "192.168.1.3"

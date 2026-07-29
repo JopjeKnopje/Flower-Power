@@ -4,11 +4,12 @@ import logging
 import platform
 import sys
 import time
-from typing import Callable, Literal
+from typing import Callable, Literal, Protocol
 import httpx
 
 import cv2
 from cv2.typing import MatLike
+from torch import Tensor, torch
 from ultralytics import YOLO
 from pathlib import Path
 
@@ -156,8 +157,7 @@ class Harvester:
         logger.info(f"connected to {len(streams)} cameras")
         return streams
 
-    def loop(self, process_cb: Callable[[Boxes], None], yolo_device: Literal["cpu", "cuda"] = "cuda") -> None:
-
+    def loop(self, callback: SupportsFrameCB, headless: bool = False, yolo_device: Literal["cpu", "cuda"] = "cuda") -> None:
         while self._viewport.is_open():
             try:
                 frame = self._viewport.read()
@@ -166,76 +166,74 @@ class Harvester:
                 continue
             # TODO: set cpu option based on cli parameter
             result = self._model.track(
-                frame, verbose=self._config.yolo_verbose, persist=True, classes=[0], device=yolo_device
+                frame,
+                verbose=self._config.yolo_verbose,
+                persist=True,
+                classes=[0],
+                device=yolo_device
             )[0]
 
             # Get the boxes and track IDs
             if result.boxes and result.boxes.is_track:
                 boxes = result.boxes.xywh.cpu()
-                # TODO: REmove boxes_cls since we already know we're just checking for a person, when we set `classes=[0]`
+                # TODO: Remove boxes_cls since we already know we're just checking for a person, when we set `classes=[0]`
                 boxes_cls = result.boxes.cls.cpu()
                 track_ids = result.boxes.id.int().cpu().tolist()
 
-                process_cb(boxes)
-
-                # for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
-                #     x, y, w, h = box
-                #     if model.names[int(box_cls)] != "person":
-                #         continue
-                #     object_diagonal = h
-                #     tracked_objects.append(int(object_diagonal))
+                # TODO: Measure time it takes to call isinstance
+                if isinstance(boxes, Tensor):
+                    callback(boxes)
 
                 # Visualize the result on the frame
                 frame = result.plot()
-            height, width, _ = frame.shape
-            # TODO Get from camera property
+                height, width, _ = frame.shape
 
-            # Display the annotated frame
-            cv2.imshow(f"Flower Power @ {width}x{height}", frame)
-
-            # value = calculate_frames(height, tracked_objects)
-
-            # # TODO: Replace this really dirty time
-            # delta = time.time() - time_old
-            # if delta > config.flower_interval:
-            #     # make_request(config.flower_endpoint, value)
-            #     time_old = time.time()
-
-            # Break the loop if 'q' is pressed
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+                # Display the annotated frame
+                if not headless:
+                    cv2.imshow(f"Flower Power @ {width}x{height}", frame)
+                    if cv2.waitKey(1) & 0xFF == ord("q"):
+                        break
         self._viewport.release()
+        if not headless:
+            cv2.destroyAllWindows()
 
+
+class SupportsFrameCB(Protocol):
+    def __call__(self, boxes: Tensor) -> None:
+        ...
 
 
 class Processor:
     # this should potentially take a web-requestor to talk to the flower.
     def __init__(self) -> None:
-        # self.boxes: list[Any] = []
-        ...
+        self._process_counter: int = 0
 
-    @classmethod
-    def process_frame_cb(cls, boxes: Boxes) -> None:
-        logger.info("called callback")
+    def process_frame(self, boxes: Tensor) -> None:
+        # for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
+        #     x, y, w, h = box
+        #     object_height = h
+        #     tracked_objects.append(int(object_height))
+
+        logger.warning(f"called callback {self._process_counter}")
+
+        self._process_counter += 1
 
 
 
 def main() -> None:
 
+    # get cli args for cuda or cpu mode (also read them from config file?)
+
     config = Config.read()
     print(config)
     harvester = Harvester(Config.read())
 
-    prc = Processor
+    prc = Processor()
 
-    harvester.loop(prc.process_frame_cb, yolo_device="cuda")
+    harvester.loop(prc.process_frame, yolo_device="cuda")
 
 
 
 
     # time_old = time.time() + config.flower_interval
 
-
-
-    # TODO: Close video caps
-    # cv2.destroyAllWindows()
