@@ -26,11 +26,6 @@ class Processor:
         self._process_counter += 1
 
 
-def host_is_headless() -> bool:
-    # when we're running on rpi its headless
-    return sys.platform == "linux" or platform.machine == "aarch64"
-
-
 # TODO: Make this actually something smaert
 def calculate_frames(frame_h: int, obj_h: list[int]) -> int:
     close_threshold = 0.5
@@ -66,9 +61,14 @@ def make_request(endpoint: str, value: int) -> None:
             logger.info(log_str)
 
 
+def host_is_headless() -> bool:
+    # check if we're running on the RPI
+    return sys.platform == "linux" and platform.machine() == "aarch64"
+
+
 def main() -> None:
 
-    # get cli args for cuda or cpu mode (also read them from config file?)
+    # TODO: get cli args for cuda or cpu mode (also read them from config file?)
 
     config = Config.read()
     print(config)
@@ -76,5 +76,10 @@ def main() -> None:
 
     prc = Processor()
 
-    harvester.loop(prc.process_frame, yolo_device="cuda")
+    is_headless = host_is_headless()
+    yolo_device = "cuda"
+    if is_headless:
+        yolo_device = "cpu"
+
+    harvester.loop(prc.process_frame, yolo_device=yolo_device, headless=is_headless)
     # time_old = time.time() + config.flower_interval
