@@ -133,6 +133,7 @@ When we strace `2.6.0`, `libcuda` is not even mentioned
 - [uv project structure](https://stackoverflow.com/a/79817200/7363348)
 - [python logging cookbook](https://docs.python.org/3/howto/logging-cookbook.html)
 - [python forward declaration __future__](https://stackoverflow.com/a/55344418/7363348)
+- [python protocols](https://andrewbrookins.com/technology/building-implicit-interfaces-in-python-with-protocol-classes/)
 
 ## Credits
 - [bufferless-video-capture](https://stackoverflow.com/a/54755738/7363348)
