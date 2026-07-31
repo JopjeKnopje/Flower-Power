@@ -9,9 +9,6 @@ flower_endpoint = "http://192.168.0.42"
 # `Y` is the part_id, this will rise as you have more recordings.
 recording_dir = "sample_recordings"
 
-# OPTIONAL: the interval between updates to the flower (default is 3)
-flower_interval = 30
-
 # OPTIONAL: enable YOLO's logging (default is true)
 yolo_verbose = false
 
