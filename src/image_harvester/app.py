@@ -14,29 +14,44 @@ logger = logger_init()
 
 class Processor:
     # this should potentially take a web-requestor to talk to the flower.
+    request_interval_s: int = 5
+
     def __init__(self) -> None:
-        self._process_counter: int = 0
+        self._process_count: int = 0
+        self._skipped_count: int = 0
 
-    def skipped(self) -> None: ...
+        self.value: float = 0
 
-    def process(self, frame: MatLike, boxes: list[Vec4f], id: int) -> None:
-        _ = id
-        for box in boxes:
-            h = box[3]
+    def skipped(self) -> None:
+        logger.warning(f"skipped {self._process_count}")
+        self._skipped_count += 1
+
+    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
+        self._skipped_count = 0
+
+        height, width, _ = frame.shape  # pyright: ignore[reportAny]
+        value: float = 0
+        for boxn in boxes_n:
+            x, y, w, h = boxn
+            x_pos = int((x - (w / 2)) * width)  # pyright: ignore[reportAny]
+            y_pos = int(y * height)  # pyright: ignore[reportAny]
+
             _ = cv2.putText(
                 frame,
                 f"height {h:.2f}",
-                (30, 40),
+                (x_pos, y_pos),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1.0,
-                (0, 255, 0),
+                (20, 205, 20),
                 2,
                 cv2.LINE_AA,
             )
             # tracked_objects.append(int(object_height))
+            value += h
+        self.value = value / len(boxes_n)
 
-        logger.warning(f"called callback {self._process_counter}")
-        self._process_counter += 1
+        logger.warning(f"value: {value}, self.value {self.value}")
+        self._process_count += 1
 
 
 # TODO: Make this actually something smaert
