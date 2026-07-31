@@ -79,7 +79,7 @@ class Harvester:
     # TODO: Maybe use ABC?
     class FrameProcessorType(Protocol):
         def skipped(self) -> None: ...
-        def process(self, frame: MatLike, boxes: list[Vec4f], id: int) -> None: ...
+        def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None: ...
 
     def __init__(self, config: Config) -> None:
         self._config: Config = config
@@ -145,9 +145,8 @@ class Harvester:
             # Get the boxes and track IDs
             if result.boxes and result.boxes.is_track:
                 boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
-                tracking_id = int(result.boxes.id.int().cpu().tolist()[0])  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportOptionalMemberAccess, reportUnknownArgumentType]
                 boxes = typing.cast(list[Vec4f], boxes)
-                processor.process(frame, boxes, tracking_id)
+                processor.process(frame, boxes)
             else:
                 processor.skipped()
 
