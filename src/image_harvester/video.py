@@ -131,7 +131,7 @@ class VideoStream:
             self._q.put(frame)
             # dirty trick to fix video playback.
             if self._lock_fps:
-                time.sleep(0.033)
+                time.sleep(0.050)
 
     def _log(self, s: str, log_level: Callable[[str], None] = logging.info) -> None:
         log_level(f"VideoStream[{self._video_src}] {s}")

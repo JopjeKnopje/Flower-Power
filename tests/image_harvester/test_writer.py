@@ -2,7 +2,6 @@ import pathlib
 import tempfile
 
 from pathlib import Path
-from typing import Self
 
 
 from image_harvester.harvester import (
@@ -45,6 +44,7 @@ def test_find_new_path_part_no_files() -> None:
 
 class StaticCounter:
     score: int = 0
+
     def __init__(self) -> None:
         # instance
         StaticCounter.score = 10
@@ -55,7 +55,6 @@ class StaticCounter:
 
     def get_score(self) -> int:
         return self.score
-
 
 
 def test_static_counter() -> None:

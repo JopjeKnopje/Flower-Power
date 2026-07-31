@@ -2,10 +2,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 import logging
 from typing import Literal, Protocol
+import typing
 
 import cv2
 from cv2.typing import MatLike
-from torch import Tensor
 from ultralytics import YOLO
 from pathlib import Path
 
@@ -20,9 +20,7 @@ logging.getLogger("httpx").setLevel("CRITICAL")
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("httpx").propagate = False
 
-
-class SupportsFrameCB(Protocol):
-    def __call__(self, boxes: Tensor) -> None: ...
+type Vec4f = tuple[float, float, float, float]
 
 
 @dataclass
@@ -78,6 +76,11 @@ def recording_path_find_part_id(dir_path: Path) -> int:
 
 
 class Harvester:
+    # TODO: Maybe use ABC?
+    class FrameProcessorType(Protocol):
+        def skipped(self) -> None: ...
+        def process(self, frame: MatLike, boxes: list[Vec4f], id: int) -> None: ...
+
     def __init__(self, config: Config) -> None:
         self._config: Config = config
 
@@ -117,10 +120,11 @@ class Harvester:
 
     def loop(
         self,
-        callback: SupportsFrameCB,
+        processor: FrameProcessorType,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:
+
         logger.info(f"starting yolo loop on device {yolo_device}")
         while self._viewport.is_open():
             try:
@@ -132,27 +136,26 @@ class Harvester:
             result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
                 frame,
                 verbose=self._config.yolo_verbose,
-                persist=True,
+                persist=False,
+                # Detect only humans
                 classes=[0],
                 device=yolo_device,
             )[0]
 
             # Get the boxes and track IDs
             if result.boxes and result.boxes.is_track:
-                boxes = result.boxes.xywh.cpu()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
-                _ = result.boxes.cls.cpu()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
-                _ = result.boxes.id.int().cpu().tolist()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportOptionalMemberAccess, reportUnknownVariableType]
-
-                # TODO: Measure time it takes to call isinstance
-                if isinstance(boxes, Tensor):
-                    callback(boxes)
+                boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
+                tracking_id = int(result.boxes.id.int().cpu().tolist()[0])  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportOptionalMemberAccess, reportUnknownArgumentType]
+                boxes = typing.cast(list[Vec4f], boxes)
+                processor.process(frame, boxes, tracking_id)
+            else:
+                processor.skipped()
 
             # Display the annotated frame
             if not headless:
                 # Visualize the result on the frame
                 frame = result.plot()
                 height, width, _ = frame.shape  # pyright: ignore[reportAny]
-
                 cv2.imshow(f"Flower Power @ {width}x{height}", frame)
                 if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
