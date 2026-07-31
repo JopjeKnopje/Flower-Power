@@ -1,12 +1,13 @@
 import platform
 import sys
 
+import cv2
+from cv2.typing import MatLike
 import httpx
-from torch import Tensor
 
 from image_harvester.logging import logger_init
 from image_harvester.config import Config
-from image_harvester.harvester import Harvester
+from image_harvester.harvester import Harvester, Vec4f
 
 logger = logger_init()
 
@@ -16,11 +17,23 @@ class Processor:
     def __init__(self) -> None:
         self._process_counter: int = 0
 
-    def process_frame(self, boxes: Tensor) -> None:
-        # for box, track_id, box_cls in zip(boxes, track_ids, boxes_cls):
-        #     x, y, w, h = box
-        #     object_height = h
-        #     tracked_objects.append(int(object_height))
+    def skipped(self) -> None: ...
+
+    def process(self, frame: MatLike, boxes: list[Vec4f], id: int) -> None:
+        _ = id
+        for box in boxes:
+            h = box[3]
+            _ = cv2.putText(
+                frame,
+                f"height {h:.2f}",
+                (30, 40),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.0,
+                (0, 255, 0),
+                2,
+                cv2.LINE_AA,
+            )
+            # tracked_objects.append(int(object_height))
 
         logger.warning(f"called callback {self._process_counter}")
         self._process_counter += 1
@@ -74,12 +87,12 @@ def main() -> None:
     print(config)
     harvester = Harvester(Config.read())
 
-    prc = Processor()
+    proc = Processor()
 
     is_headless = host_is_headless()
     yolo_device = "cuda"
     if is_headless:
         yolo_device = "cpu"
 
-    harvester.loop(prc.process_frame, yolo_device=yolo_device, headless=is_headless)
+    harvester.loop(proc, yolo_device=yolo_device, headless=is_headless)
     # time_old = time.time() + config.flower_interval
