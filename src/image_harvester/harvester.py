@@ -125,7 +125,7 @@ class Harvester:
             try:
                 frame = self._viewport.read()
             except Exception as e:
-                logger.error(e)
+                logger.error(f"_viewport.read failed {e}")
                 continue
             # TODO: set cpu option based on cli parameter
             result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
