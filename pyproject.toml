@@ -32,6 +32,7 @@ dev = [
 
 [project.scripts]
 image-harvester = "image_harvester:main"
+plotter = "image_harvester:plotter"
 ping-test = "image_harvester:ping"
 formula = "image_harvester:formula"
 mock-controller = "mock_controller:main"
