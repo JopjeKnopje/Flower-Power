@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
+
 import httpx
 from httpx import Response
 import msgspec

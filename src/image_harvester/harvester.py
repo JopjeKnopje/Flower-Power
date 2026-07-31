@@ -1,6 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass
-import logging
 from typing import Literal, Protocol
 import typing
 
@@ -15,10 +14,6 @@ from image_harvester.logging import logger_init
 from image_harvester.video import VideoSource, VideoStream
 
 logger = logger_init()
-# TODO: Fix this
-logging.getLogger("httpx").setLevel("CRITICAL")
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("httpx").propagate = False
 
 type Vec4f = tuple[float, float, float, float]
 
