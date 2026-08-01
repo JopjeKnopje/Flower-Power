@@ -7,7 +7,7 @@ def ema(data: list[int], weight: float) -> list[float]:
     return ema_data
 
 
-def sma(data: list[int], range: int) -> list[float]:
+def sma(data: list[float], range: int) -> list[float]:
     sma_data: list[float] = []
     for i, _ in enumerate(data, start=1):
         if i < range:
