@@ -2,6 +2,7 @@ from collections import deque
 import platform
 import sys
 import pickle
+from torch.cuda import is_available as cuda_is_avaliable
 
 import cv2
 from cv2.typing import MatLike
@@ -132,7 +133,7 @@ def main() -> None:
 
     is_headless = host_is_headless()
     yolo_device = "cuda"
-    if is_headless:
+    if is_headless or not cuda_is_avaliable():
         yolo_device = "cpu"
 
     harvester.loop(proc, yolo_device=yolo_device, headless=is_headless)
