@@ -38,8 +38,10 @@ class Processor:
     def update_flower(self, pos: int) -> None:
         self._timer.start_if_not_running()
         if self._timer.delta() > self._REQUEST_INTERVAL_MS:
-            # TODO: Handle connection refused when server offline
-            _ = self._api.move(pos)
+            try:
+                _ = self._api.move(pos)
+            except httpx.ConnectError as e:
+                logger.exception(e)
 
             self._timer.start()
 
