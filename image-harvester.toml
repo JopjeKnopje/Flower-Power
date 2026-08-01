@@ -1,11 +1,14 @@
-flower_endpoint = "http://192.168.0.20:8080"
-flower_interval = 5
-yolo_verbose = true
+flower_endpoint = "http://localhost:9000"
+yolo_verbose = false
+# recording_dir = "sample_recordings_fr"
 
 
 
-[[cameras]]
-uri = "192.168.1.2"
 
 [[cameras]]
-uri = "192.168.1.3"
+# uri = "192.168.1.2"
+# uri = "/home/joppe/Videos/untitled.mp4"
+uri = "test-vids/office_people.mp4"
+# uri = "sample_recordings_fr/close.png"
+# uri = "sample_recordings_fr/cam-0-0.avi"
+

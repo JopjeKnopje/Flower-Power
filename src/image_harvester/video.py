@@ -133,7 +133,6 @@ class VideoStream:
         while self._get_should_render():
             # TODO: this exception will exit the thread, handle that some way
             # TODO: this will fail due to it not being mutex locked when we call `release()`
-            logger.info("still running")
             success, frame = self._cap.read()
             if self._videosource_is_video is True and read_frames >= avaliable_frames:
                 logger.info("no more video frames left to read")
@@ -157,7 +156,6 @@ class VideoStream:
                 time.sleep(0.050)
 
         self._cap.release()
-        logger.info("cap released")
 
     def _log(self, s: str, log_level: Callable[[str], None] = logging.info) -> None:
         log_level(f"VideoStream[{self._video_src}] {s}")
@@ -184,5 +182,4 @@ class VideoStream:
 
     def is_open(self) -> bool:
         state = self._cap.isOpened()
-        logger.info(f"is_open {state}")
         return state
