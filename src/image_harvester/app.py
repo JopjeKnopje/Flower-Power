@@ -1,34 +1,48 @@
+from collections import deque
 import platform
 import sys
+import pickle
 
 import cv2
 from cv2.typing import MatLike
 import httpx
 
+from image_harvester.flower_api import Flower
 from image_harvester.logging import logger_init
 from image_harvester.config import Config
 from image_harvester.harvester import Harvester, Vec4f
+from image_harvester.smoothing import sma
+from image_harvester.timer import Timer
 
 logger = logger_init()
 
 
 class Processor:
-    # this should potentially take a web-requestor to talk to the flower.
-    request_interval_s: int = 5
+    _REQUEST_INTERVAL_MS: int = 2000
+    _DEQUE_SIZE: int = 20
 
-    def __init__(self) -> None:
-        self._process_count: int = 0
-        self._skipped_count: int = 0
+    def __init__(self, api: Flower) -> None:
+        self._api: Flower = api
 
-        self.value: float = 0
+        self._sma_output_list: list[float] = []
+
+        self._data_raw: list[int] = []
+        self._data_raw_ringbuf: deque[float] = deque(maxlen=self._DEQUE_SIZE)
+        self._timer: Timer = Timer()
 
     def skipped(self) -> None:
-        logger.warning(f"skipped {self._process_count}")
-        self._skipped_count += 1
+        logger.warning("skipped processing, no one detected")
+
+    # TODO: Run async of threaded?
+    def update_flower(self, pos: int) -> None:
+        self._timer.start_if_not_running()
+        if self._timer.delta() > self._REQUEST_INTERVAL_MS:
+            # TODO: Handle connection refused when server offline
+            _ = self._api.move(pos)
+
+            self._timer.start()
 
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
-        self._skipped_count = 0
-
         height, width, _ = frame.shape  # pyright: ignore[reportAny]
         value: float = 0
         for boxn in boxes_n:
@@ -48,10 +62,20 @@ class Processor:
             )
             # tracked_objects.append(int(object_height))
             value += h
-        self.value = value / len(boxes_n)
-
-        logger.warning(f"value: {value}, self.value {self.value}")
-        self._process_count += 1
+        value = int((value / len(boxes_n)) * 10)
+        self._data_raw_ringbuf.append(value)
+        self._data_raw.append(value)
+        if self._data_raw_ringbuf.maxlen is not None:
+            logger.info("starting sma")
+            sma_list = list(self._data_raw_ringbuf)
+            sma_value = sma(sma_list, self._data_raw_ringbuf.maxlen)[-1]
+            self._sma_output_list.append(sma_value)
+            logger.warning(
+                f"input: {self._data_raw_ringbuf[-1]} sma output: {sma_value}"
+            )
+            self.update_flower(int(sma_value))
+        else:
+            raise Exception("_points.maxlen not set, cannot perform sma")
 
 
 # TODO: Make this actually something smaert
@@ -102,7 +126,9 @@ def main() -> None:
     print(config)
     harvester = Harvester(Config.read())
 
-    proc = Processor()
+    api = Flower(config.flower_endpoint)
+
+    proc = Processor(api)
 
     is_headless = host_is_headless()
     yolo_device = "cuda"
@@ -110,4 +136,10 @@ def main() -> None:
         yolo_device = "cpu"
 
     harvester.loop(proc, yolo_device=yolo_device, headless=is_headless)
-    # time_old = time.time() + config.flower_interval
+
+    if len(proc._data_raw) != 0:
+        with open("office_people.raw", "wb") as f:
+            pickle.dump(proc._data_raw, f)
+    if len(proc._sma_output_list) != 0:
+        with open("office_people.sma", "wb") as f:
+            pickle.dump(proc._sma_output_list, f)
