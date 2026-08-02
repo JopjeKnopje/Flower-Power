@@ -56,23 +56,50 @@ You should now be able to reach the camera (and any other devices on that networ
 
 
 
+TODO: CLEAN UP DOWCX AHHAHAHHA
+
+
+# Addressing
+
+If you cannot reach the camera check fi they're running on `192.168.0.90` which is their default address.
+
+
+Its all in the `192.168.0.0/24` range, these addresses are static.
+We connect to this network using a laptop, also configured with a static address.
+We can connect our laptop to a mobile hotspot or wifi network if we wan't connectivity.
+
+In case we need network access to the RPI, we could setup a route to the laptop which will have a masqurade rule?
+
+
+RPI: 192.168.0.135
+CAM-1: 192.168.0.1
+CAM-2: 192.168.0.2
+CAM-3: 192.168.0.3
+CAM-4: 192.168.0.4
+FLOWER_ENDPOINT: 192.168.0.42
 
 ## Configure WAN less setup
 
-Add a static ip to our interface
+Add a static ip to our interface so we can access the "flower network"
 
+### Laptop configuration
+```bash
 sudo ip link set enp0s31f6 down
-sudo ip a add 192.168.1.10/24 dev enp0s31f6
+sudo ip a add 192.168.0.10/24 dev enp0s31f6
 sudo ip link set enp0s31f6 up
-Add the route if not exists
-sudo ip route add 192.168.1.0/24 dev enp0s31f6
+# there should be a route added, if thats not the case run.
+sudo ip route add 192.168.0.0/24 dev enp0s31f6
+```
 
-
+### Using DHCP server incase of static ip issues
 sysctl net.ipv4.ip_unprivileged_port_start=67
-
 install dns masq 
 in its config `/etc/dnsmasq.conf` set `port=0` to disable its DNS shit
 
+Monitor its logs with
+```bash
+journalctl --follow -u dnsmasq
+```
 ## Troubleshooting
 ### Check if running cuda
 
