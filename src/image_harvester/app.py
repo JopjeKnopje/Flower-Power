@@ -1,12 +1,11 @@
 from collections import deque
 import platform
 import sys
-import pickle
+import httpx
 from torch.cuda import is_available as cuda_is_avaliable
 
 import cv2
 from cv2.typing import MatLike
-import httpx
 
 from image_harvester.flower_api import Flower
 from image_harvester.logging import logger_init
@@ -81,49 +80,12 @@ class Processor:
             raise Exception("_points.maxlen not set, cannot perform sma")
 
 
-# TODO: Make this actually something smaert
-def calculate_frames(frame_h: int, obj_h: list[int]) -> int:
-    close_threshold = 0.5
-
-    close_count = 0
-    away_count = 0
-
-    for o in obj_h:
-        # higher = closer
-        ratio = 1 - (frame_h - o) / frame_h
-        # logger.info(f"frame {ratio}")
-        if ratio > close_threshold:
-            close_count += 2
-        else:
-            away_count += 1
-
-    value = int(close_count + away_count)
-    # logger.info(f"value {value} close_count {close_count} away_count {away_count}")
-
-    return value
-
-
-def make_request(endpoint: str, value: int) -> None:
-    if value >= 0 and value <= 9:
-        r_str = f"{endpoint}/move?band={value}"
-        r = httpx.request("GET", url=r_str)
-        logger.info(f"send request {r_str}")
-
-        log_str = f"controller HTTP: {r.status_code}"
-        if r.status_code >= 400:
-            logger.warning(log_str)
-        elif r.status_code:
-            logger.info(log_str)
-
-
 def host_is_headless() -> bool:
     # check if we're running on the RPI
     return sys.platform == "linux" and platform.machine() == "aarch64"
 
 
 def main() -> None:
-
-    # TODO: get cli args for cuda or cpu mode (also read them from config file?)
 
     config = Config.read()
     print(config)
@@ -140,9 +102,9 @@ def main() -> None:
 
     harvester.loop(proc, yolo_device=yolo_device, headless=is_headless)
 
-    if len(proc._data_raw) != 0:
-        with open("office_people.raw", "wb") as f:
-            pickle.dump(proc._data_raw, f)
-    if len(proc._sma_output_list) != 0:
-        with open("office_people.sma", "wb") as f:
-            pickle.dump(proc._sma_output_list, f)
+    # if len(proc._data_raw) != 0:
+    #     with open("office_people.raw", "wb") as f:
+    #         pickle.dump(proc._data_raw, f)
+    # if len(proc._sma_output_list) != 0:
+    #     with open("office_people.sma", "wb") as f:
+    #         pickle.dump(proc._sma_output_list, f)
