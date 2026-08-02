@@ -10,6 +10,7 @@ Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overvi
 - [prek](https://prek.j178.dev/installation/) (dev)
 - [ruff](https://docs.astral.sh/ruff/editors/setup/) (dev)
 - [basedpyright](https://github.com/DetachHead/basedpyright) (dev)
+- [just](https://just.systems/man/en/)
 
 
 ## Installation
@@ -128,6 +129,7 @@ Set the password to `admin`
 
 
 ## Todo V2
+- [ ] Run simple server on the RPI which logs the data both pre and post processed from the flower.
 - [ ] Add seek to video playback
 - [ ] Think about design pattern so we can inject behaviour in our loop regarding running headless.
 - [ ] Add `cam_id` to config file, also check that there are no duplicates
