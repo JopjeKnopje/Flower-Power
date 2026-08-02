@@ -129,6 +129,13 @@ Set the password to `admin`
 
 
 ## Todo V2
+- [ ] Crop images to remove sky, join images together to optimize space.
+- [ ] Use predict
+- [ ] Remote video feed
+- [ ] Flower animation
+- [ ] NOTE: Flower pos is 0-9
+- [ ] Add endpoint to ping test
+- [ ] Setup/preview mode, run the GUI without any api calls or processing
 - [ ] Run simple server on the RPI which logs the data both pre and post processed from the flower.
 - [ ] Add seek to video playback
 - [ ] Think about design pattern so we can inject behaviour in our loop regarding running headless.
