@@ -10,9 +10,7 @@ def logger_init() -> logging.Logger:
     if not logger.handlers:
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
-
         ch.setFormatter(CustomFormatter())
-
         logger.addHandler(ch)
     return logger
 
@@ -27,7 +25,7 @@ class CustomFormatter(logging.Formatter):
     format_str = "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s"
     format_debug_str = "[%(asctime)s][%(filename)s:%(lineno)d][%(funcName)s][%(levelname)s] %(message)s"
 
-    FORMATS = {
+    FORMATS: dict[int, str] = {
         logging.DEBUG: grey + format_debug_str + reset,
         logging.INFO: grey + format_str + reset,
         logging.WARNING: yellow + format_str + reset,
