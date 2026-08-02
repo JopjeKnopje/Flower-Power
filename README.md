@@ -57,6 +57,21 @@ You should now be able to reach the camera (and any other devices on that networ
 
 
 
+## Configure WAN less setup
+
+Add a static ip to our interface
+
+sudo ip link set enp0s31f6 down
+sudo ip a add 192.168.1.10/24 dev enp0s31f6
+sudo ip link set enp0s31f6 up
+Add the route if not exists
+sudo ip route add 192.168.1.0/24 dev enp0s31f6
+
+
+sysctl net.ipv4.ip_unprivileged_port_start=67
+
+install dns masq 
+in its config `/etc/dnsmasq.conf` set `port=0` to disable its DNS shit
 
 ## Troubleshooting
 ### Check if running cuda
