@@ -65,7 +65,7 @@ class Processor:
             # tracked_objects.append(int(object_height))
             value += h
         value = int((value / len(boxes_n)) * 10)
-        self._data_raw_ringbuf.append(value)
+        self._data_raw_ringbuf.append(value + 0.5)
         self._data_raw.append(value)
         if self._data_raw_ringbuf.maxlen is not None:
             logger.info("starting sma")
