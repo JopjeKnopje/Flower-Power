@@ -92,9 +92,19 @@ sudo ip link set enp0s31f6 up
 sudo ip route add 192.168.0.0/24 dev enp0s31f6
 ```
 
-### Using DHCP server incase of static ip issues
+
+### Desktop configuration
+
+```bash
+sudo ip a add 192.168.0.10/24 dev enp42s0
+```
+
+### Using DHCP server to reach the PI in-case of static ip issues
+```bash
 sysctl net.ipv4.ip_unprivileged_port_start=67
-install dns masq 
+apt install dns masq
+```
+
 in its config `/etc/dnsmasq.conf` set `port=0` to disable its DNS shit
 
 Monitor its logs with
@@ -129,8 +139,12 @@ Set the password to `admin`
 
 
 ## Todo V2
+### Calibration mode
+Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
+We'd run the program like `image-harvester calibrate`
+
 - [ ] Crop images to remove sky, join images together to optimize space.
-- [ ] Use predict
+- [ ] Use predict instead of track
 - [ ] Remote video feed
 - [ ] Flower animation
 - [ ] NOTE: Flower pos is 0-9
