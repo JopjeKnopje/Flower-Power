@@ -3,7 +3,7 @@ from ipaddress import IPv4Address
 from typing import Callable
 
 from image_harvester.config import Config
-from image_harvester.logging import logger_init
+from image_harvester.logs import logger_init
 
 logger = logger_init()
 

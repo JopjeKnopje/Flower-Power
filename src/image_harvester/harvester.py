@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 from image_harvester.config import Config
-from image_harvester.logging import logger_init
+from image_harvester.logs import logger_init
 from image_harvester.video import VideoSource, VideoStream
 
 logger = logger_init()
