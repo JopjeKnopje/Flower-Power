@@ -5,7 +5,7 @@ from pathlib import Path
 import pathlib
 from typing import Self
 import msgspec
-from image_harvester.logging import logger_init
+from image_harvester.logs import logger_init
 
 logger = logger_init()
 

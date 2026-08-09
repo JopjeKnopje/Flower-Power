@@ -10,18 +10,16 @@ requires-python = ">=3.13"
 
 dependencies = [
     "torch==2.11.0+cu126;	sys_platform == 'linux' and platform_machine == 'x86_64'",
-	"torch==2.9.0;			sys_platform == 'darwin' or platform_machine == 'aarch64'",
+    "torch==2.9.0;			sys_platform == 'darwin' or platform_machine == 'aarch64'",
     # "torchvision==0.26.0 ; sys_platform == 'linux' and platform_machine == 'aarch64'",
     "torchvision",
-	# "torchvision ; sys_platform == 'darwin'",
-
-
-
+    # "torchvision ; sys_platform == 'darwin'",
     "msgspec>=0.21.1",
     "pillow>=12.2.0",
     "ultralytics>=8.4.51",
     "lap>=0.5.12",
     "httpx>=0.28.1",
+    "cyclopts>=4.22.5",
 ]
 
 
