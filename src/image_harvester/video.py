@@ -14,7 +14,7 @@ import cv2
 from cv2.typing import MatLike
 
 from image_harvester.config import Camera
-from image_harvester.logging import logger_init
+from image_harvester.logs import logger_init
 
 URIType = str | int
 
