@@ -1,0 +1,78 @@
+from collections import deque
+
+import cv2
+from cv2.typing import MatLike
+import httpx
+
+from image_harvester.flower_api import Flower
+
+# TODO: Use timeit timer instead?
+from image_harvester.harvester import Vec4f
+from image_harvester.logs import logger_init
+from image_harvester.smoothing import sma
+from image_harvester.timer import Timer
+
+logger = logger_init()
+
+
+class Processor:
+    _REQUEST_INTERVAL_MS: int = 2000
+    _DEQUE_SIZE: int = 20
+
+    def __init__(self, api: Flower) -> None:
+        self._api: Flower = api
+
+        self._sma_output_list: list[float] = []
+
+        self._data_raw: list[int] = []
+        self._data_raw_ringbuf: deque[float] = deque(maxlen=self._DEQUE_SIZE)
+        self._timer: Timer = Timer()
+
+    def skipped(self) -> None:
+        logger.warning("skipped processing, no one detected")
+
+    # TODO: Run async of threaded?
+    def update_flower(self, pos: int) -> None:
+        self._timer.start_if_not_running()
+        if self._timer.delta() > self._REQUEST_INTERVAL_MS:
+            try:
+                _ = self._api.move(pos)
+            except httpx.ConnectError as e:
+                logger.exception(e)
+
+            self._timer.start()
+
+    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
+        height, width, _ = frame.shape  # pyright: ignore[reportAny]
+        value: float = 0
+        for boxn in boxes_n:
+            x, y, w, h = boxn
+            x_pos = int((x - (w / 2)) * width)  # pyright: ignore[reportAny]
+            y_pos = int(y * height)  # pyright: ignore[reportAny]
+
+            _ = cv2.putText(
+                frame,
+                f"height {h:.2f}",
+                (x_pos, y_pos),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.0,
+                (20, 205, 20),
+                2,
+                cv2.LINE_AA,
+            )
+            # tracked_objects.append(int(object_height))
+            value += h
+        value = int((value / len(boxes_n)) * 10)
+        self._data_raw_ringbuf.append(value + 0.5)
+        self._data_raw.append(value)
+        if self._data_raw_ringbuf.maxlen is not None:
+            logger.info("starting sma")
+            sma_list = list(self._data_raw_ringbuf)
+            sma_value = sma(sma_list, self._data_raw_ringbuf.maxlen)[-1]
+            self._sma_output_list.append(sma_value)
+            logger.warning(
+                f"input: {self._data_raw_ringbuf[-1]} sma output: {sma_value}"
+            )
+            self.update_flower(int(sma_value))
+        else:
+            raise Exception("_points.maxlen not set, cannot perform sma")
