@@ -6,7 +6,7 @@ import tempfile
 import pytest
 from pytest import MonkeyPatch
 
-from image_harvester.config import Camera, Config
+from image_harvester.config import Camera, FlowerConfig
 from image_harvester.video import (
     VideoSource,
     VideoSourceRTP,
@@ -42,7 +42,7 @@ def config_data() -> str:
 
 def test_read_data(config_data: str) -> None:
 
-    c = Config.parse(config_data)
+    c = FlowerConfig.parse(config_data)
 
     assert len(c.cameras) == 2
 
@@ -58,7 +58,7 @@ def test_read_file_not_found(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("FLOWER_CONFIG_PATH", "non-existent")
 
     with pytest.raises(FileNotFoundError):
-        _ = Config.read()
+        _ = FlowerConfig.read()
 
 
 def test_read_file(monkeypatch: MonkeyPatch, config_data: str) -> None:
@@ -67,7 +67,7 @@ def test_read_file(monkeypatch: MonkeyPatch, config_data: str) -> None:
         _ = f.write(config_data.encode())
 
     monkeypatch.setenv("FLOWER_CONFIG_PATH", f.name)
-    _ = Config.read()
+    _ = FlowerConfig.read()
 
 
 def test_create_source_rtp() -> None:
@@ -91,7 +91,7 @@ def test_create_source_uri() -> None:
 # TODO: Add fixture which pings the camera, if the cameras are connected, return their addresses as a list
 @pytest.mark.skip(reason="Camera may not be connected")
 def test_create_streams() -> None:
-    config = Config(
+    config = FlowerConfig(
         flower_endpoint="192.168.0.42",
         cameras=[
             Camera("192.168.0.2"),

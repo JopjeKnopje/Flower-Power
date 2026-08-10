@@ -143,8 +143,11 @@ Set the password to `admin`
 Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
 We'd run the program like `image-harvester calibrate`
 
+- [ ] Fix fonts
 - [ ] Crop images to remove sky, join images together to optimize space.
 - [ ] Use predict instead of track
+- [ ] Use optimized model format for PI / edge devices
+- [ ] Stream/log datapoints
 - [ ] Remote video feed
 - [ ] Flower animation
 - [ ] NOTE: Flower pos is 0-9
