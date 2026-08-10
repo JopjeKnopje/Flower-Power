@@ -9,7 +9,7 @@ from ultralytics import YOLO
 from pathlib import Path
 
 
-from image_harvester.config import Config
+from image_harvester.config import Camera, FlowerConfig
 from image_harvester.logs import logger_init
 from image_harvester.video import VideoSource, VideoStream
 
@@ -45,6 +45,23 @@ class JointViewport:
             s.release()
 
 
+def init_streams_from_cams(
+    cams: list[Camera], recording_dir: str | None = None
+) -> list[VideoStream]:
+    streams: list[VideoStream] = []
+
+    for i, c in enumerate(cams):
+        writer_out_path = None
+        if recording_dir:
+            writer_out_path = recording_get_path(Path(recording_dir), i)
+        video_src = VideoSource.from_cfg_camera(c)
+        stream = VideoStream(video_src, writer_out_path)
+        streams.append(stream)
+
+    logger.info(f"connected to {len(streams)} cameras")
+    return streams
+
+
 def recording_path_file_name(cam_id: int, part_id: int) -> str:
     return f"cam-{cam_id}-{part_id}.avi"
 
@@ -70,16 +87,24 @@ def recording_path_find_part_id(dir_path: Path) -> int:
     return part_id_max
 
 
+def recording_get_path(dir_path: Path, cam_id: int) -> Path:
+    dir_path.mkdir(exist_ok=True)
+    part_id = recording_path_find_part_id(dir_path)
+    return dir_path.joinpath(Path(recording_path_file_name(cam_id, part_id)))
+
+
 class Harvester:
     # TODO: Maybe use ABC?
     class FrameProcessorType(Protocol):
         def skipped(self) -> None: ...
         def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None: ...
 
-    def __init__(self, config: Config) -> None:
-        self._config: Config = config
+    def __init__(self, config: FlowerConfig) -> None:
+        self._config: FlowerConfig = config
 
-        self._viewport: JointViewport = JointViewport(self._init_streams(config))
+        self._viewport: JointViewport = JointViewport(
+            init_streams_from_cams(self._config.cameras, self._config.recording_dir)
+        )
         if not self._viewport.is_open():
             print("error viewport not open")
         else:
@@ -89,29 +114,6 @@ class Harvester:
         model_path = "yolo26n.pt"
         self._model: YOLO = YOLO(model_path)
         logger.info(f"done loading model {model_path}")
-
-    @staticmethod
-    def _recording_get_path(dir_path: Path, cam_id: int) -> Path:
-        dir_path.mkdir(exist_ok=True)
-        part_id = recording_path_find_part_id(dir_path)
-        return dir_path.joinpath(Path(recording_path_file_name(cam_id, part_id)))
-
-    @staticmethod
-    def _init_streams(cfg: Config) -> list[VideoStream]:
-        streams: list[VideoStream] = []
-
-        for i, c in enumerate(cfg.cameras):
-            writer_out_path = None
-            if cfg.recording_dir:
-                writer_out_path = Harvester._recording_get_path(
-                    Path(f"{cfg.recording_dir}"), i
-                )
-            video_src = VideoSource.from_cfg_camera(c)
-            stream = VideoStream(video_src, writer_out_path)
-            streams.append(stream)
-
-        logger.info(f"connected to {len(streams)} cameras")
-        return streams
 
     def loop(
         self,
