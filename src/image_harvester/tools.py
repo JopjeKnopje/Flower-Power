@@ -2,7 +2,7 @@ import subprocess
 from ipaddress import IPv4Address
 from typing import Callable
 
-from image_harvester.config import Config
+from image_harvester.config import FlowerConfig
 from image_harvester.logs import logger_init
 
 logger = logger_init()
@@ -15,7 +15,7 @@ def _ping_command(addr: IPv4Address) -> ArgvTuple:
     return ("ping", "-c1", str(addr))
 
 
-def _get_commmands(config: Config) -> list[ArgvTuple]:
+def _get_commmands(config: FlowerConfig) -> list[ArgvTuple]:
     commands: list[ArgvTuple] = []
     for c in config.cameras:
         uri = c.get_uri()
@@ -32,7 +32,7 @@ def _log_bytes(data: bytes, logging_func: Callable[[str], None]) -> None:
 
 
 def ping() -> None:
-    config = Config.read()
+    config = FlowerConfig.read()
     commands = _get_commmands(config)
 
     remotes = len(commands)
