@@ -1,4 +1,4 @@
-from .app import main
+from .cli import main
 from .tools import ping
 from .formula import formula
 from .plotter import plotter

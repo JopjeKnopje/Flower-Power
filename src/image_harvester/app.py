@@ -1,17 +1,14 @@
 import platform
 import sys
+from typing import Any
 
-from cyclopts import App
-from torch.cuda import is_available as cuda_is_avaliable
+from attr import dataclass
+import cv2
+from cv2.typing import Point
 
-from image_harvester.config import Config
-from image_harvester.flower_api import Flower
-from image_harvester.harvester import Harvester
 from image_harvester.logs import logger_init
-from image_harvester.processor import Processor
 
 logger = logger_init()
-cli = App()
 
 
 def host_is_headless() -> bool:
@@ -19,35 +16,57 @@ def host_is_headless() -> bool:
     return sys.platform == "linux" and platform.machine() == "aarch64"
 
 
-@cli.command
-def calibrate() -> None: ...
+@dataclass
+class CropConfig:
+    _point_start: Point
+    _point_end: Point
+    _uri: str
 
 
-@cli.default
-def run() -> None:
+class OpenCVCropper:
+    # TODO: Find way of doing a fixed size list, which still supports indexing
+    _point_start: Point
+    _point_end: Point
+    _initial_point_is_set: bool
 
-    config = Config.read()
-    print(config)
-    harvester = Harvester(Config.read())
+    def __init__(self) -> None:
+        self._point_start = (0, 0)
+        self._point_end = (0, 0)
+        self._initial_point_is_set = False
 
-    api = Flower(config.flower_endpoint)
+    def mouse_cb(
+        self,
+        event: int,
+        x: int,
+        y: int,
+        flags: int,
+        user_data: Any | None,  # pyright: ignore[reportExplicitAny]
+    ) -> None:
+        _ = flags
+        _ = user_data
 
-    proc = Processor(api)
+        if event == cv2.EVENT_LBUTTONDOWN and not self._initial_point_is_set:
+            self._point_start = (x, y)
+            self._initial_point_is_set = True
 
-    is_headless = host_is_headless()
-    yolo_device = "cuda"
-    if is_headless or not cuda_is_avaliable():
-        yolo_device = "cpu"
+        if event == cv2.EVENT_MOUSEMOVE and self._initial_point_is_set:
+            self._point_end = (x, y)
 
-    harvester.loop(proc, yolo_device=yolo_device, headless=is_headless)
+        if event == cv2.EVENT_LBUTTONUP:
+            self._initial_point_is_set = False
 
-    # if len(proc._data_raw) != 0:
-    #     with open("office_people.raw", "wb") as f:
-    #         pickle.dump(proc._data_raw, f)
-    # if len(proc._sma_output_list) != 0:
-    #     with open("office_people.sma", "wb") as f:
-    #         pickle.dump(proc._sma_output_list, f)
+    # _typing.Callable[[tuple[int] | tuple[int, _typing.Any]], None]
+    def save_cb(self, x: tuple[int] | tuple[int, Any], user_data: Any) -> None:  # pyright: ignore[reportExplicitAny, reportAny]
+        logger.info(x)
+        logger.info(user_data)  # pyright: ignore[reportAny]
 
-
-def main() -> None:
-    cli()
+    def get_rect(self) -> tuple[Point, Point] | None:
+        # I wanna throw up
+        if (
+            self._point_start[0] > 0
+            and self._point_start[1] > 0
+            and self._point_end[0] > 0
+            and self._point_end[1] > 0
+        ):
+            return (self._point_start, self._point_end)
+        return None
