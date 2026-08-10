@@ -42,7 +42,7 @@ def dec_hook(type: type[Path], obj: str) -> Path:
 
 # NOTE: Make this static?
 @dataclass
-class Config:
+class FlowerConfig:
     cameras: list[Camera]
     flower_endpoint: str
     yolo_verbose: bool = True
