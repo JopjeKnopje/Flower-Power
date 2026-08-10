@@ -32,7 +32,7 @@ class VideoSource:
     def from_cfg_camera(cls, c: Camera) -> VideoSource:
         uri = c.get_uri()
         if isinstance(uri, int):
-            return VideoSourceIndex(uri)
+            return VideoSourceV4L(uri)
         elif isinstance(uri, IPv4Address):
             return VideoSourceRTP(
                 address=uri, path=c.rstp_path, username=c.username, password=c.password
@@ -45,7 +45,7 @@ class VideoSource:
         return self._uri
 
 
-class VideoSourceIndex(VideoSource):
+class VideoSourceV4L(VideoSource):
     def __init__(self, index: int) -> None:
         VideoSource.__init__(self, uri=index)
 
