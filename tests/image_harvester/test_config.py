@@ -6,7 +6,7 @@ import tempfile
 import pytest
 from pytest import MonkeyPatch
 
-from image_harvester.config import Camera, FlowerConfig
+from image_harvester.flower_config import Camera, FlowerConfig
 from image_harvester.video import (
     VideoSource,
     VideoSourceRTP,
