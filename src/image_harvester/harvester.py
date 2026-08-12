@@ -19,13 +19,13 @@ logger = logger_init()
 
 type Vec4f = tuple[float, float, float, float]
 
+
 @dataclass
 class CropSettings:
     start_x: int = 0
     start_y: int = 0
     end_x: int = 0
     end_y: int = 0
-
 
     @classmethod
     def load_all(cls) -> list[Self]:
@@ -60,7 +60,12 @@ class CropSettings:
 @dataclass
 class JointViewport:
     _video_streams: list[VideoStream]
-    _crop: list[CropSettings] | None = None
+    _crop_settings: list[CropSettings] | None = None
+    _crop_max_width: int = 0
+
+    def __post_init__(self):
+        if self._crop_settings:
+            self._crop_max_width = self._find_largest_crop()
 
     def is_open(self) -> bool:
         for s in self._video_streams:
@@ -74,21 +79,33 @@ class JointViewport:
     def read_stream(self, id: int) -> MatLike:
         return self.get_stream(id).read()
 
-    # TODO: optionally pass list of crops
+    def _find_largest_crop(self) -> int:
+        max_width = 0
+        if not self._crop_settings:
+            return max_width
+
+        for c in self._crop_settings:
+            h = c.end_x - c.start_x
+            if h > max_width:
+                max_width = h
+        return max_width
+
+    # TODO: Find best fitting resize for algo
     def read(self) -> MatLike:
         imgs: list[MatLike] = []
 
         for i, _ in enumerate(self._video_streams):
             img = self.read_stream(i)
-            if self._crop:
-                crop = self._crop[i]
-                logger.info(crop)
-                t = img[crop.start_y:crop.end_y, crop.start_x:crop.end_x]
-                imgs.append(t)
-            else:
-                imgs.append(img)
-        # return cv2.hconcat(imgs)
-        return imgs[0]
+            if self._crop_settings:
+                crop = self._crop_settings[i]
+                _, original_width, _ = img.shape  # pyright: ignore[reportAny]
+
+                if original_width > self._crop_max_width:
+                    img = img[crop.start_y : crop.end_y, crop.start_x : crop.end_x]
+                    cropped_height = crop.end_y - crop.start_y
+                    img = cv2.resize(img, (self._crop_max_width, cropped_height))
+            imgs.append(img)
+        return cv2.vconcat(imgs)
 
     @property
     def stream_count(self) -> int:
@@ -158,7 +175,7 @@ class Harvester:
 
         self._viewport: JointViewport = JointViewport(
             init_streams_from_cams(self._config.cameras, self._config.recording_dir),
-            CropSettings.load_all()
+            CropSettings.load_all(),
         )
         if not self._viewport.is_open():
             print("error viewport not open")
@@ -184,28 +201,27 @@ class Harvester:
             except Exception as e:
                 logger.error(f"_viewport.read failed {e}")
                 continue
-            # TODO: set cpu option based on cli parameter
-            # result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
-            #     frame,
-            #     verbose=self._config.yolo_verbose,
-            #     persist=False,
-            #     # Detect only humans
-            #     classes=[0],
-            #     device=yolo_device,
-            # )[0]
+            result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
+                frame,
+                verbose=self._config.yolo_verbose,
+                persist=False,
+                # Detect only humans
+                classes=[0],
+                device=yolo_device,
+            )[0]
 
             # Get the boxes and track IDs
-            # if result.boxes and result.boxes.is_track:
-            #     boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
-            #     boxes = typing.cast(list[Vec4f], boxes)
-            #     processor.process(frame, boxes)
-            # else:
-            #     processor.skipped()
+            if result.boxes and result.boxes.is_track:
+                boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
+                boxes = typing.cast(list[Vec4f], boxes)
+                processor.process(frame, boxes)
+            else:
+                processor.skipped()
 
             # Display the annotated frame
             if not headless:
                 # Visualize the result on the frame
-                # frame = result.plot()
+                frame = result.plot()
                 height, width, _ = frame.shape  # pyright: ignore[reportAny]
                 cv2.imshow(f"Flower Power @ {width}x{height}", frame)
                 if cv2.waitKey(1) & 0xFF == ord("q"):
