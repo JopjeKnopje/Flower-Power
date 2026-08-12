@@ -1,27 +1,37 @@
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, override
-import msgspec
 
-from attr import dataclass
 import cv2
 from cv2.typing import MatLike, Point
 
 
 from image_harvester.flower_config import Camera
-from image_harvester.harvester import JointViewport, init_streams_from_cams
+from image_harvester.harvester import CropSettings, JointViewport, init_streams_from_cams
 from image_harvester.logs import logger_init
 from image_harvester.settings import Settings
 
 logger = logger_init()
 
 
-@dataclass
+
+
+# gnarly
 class CropSelector:
-    # TODO: Find way of doing a fixed size list, which still supports indexing
-    crop_start: Point = (0, 0)
-    crop_end: Point = (0, 0)
-    _initial_point_is_set: bool = False
+    _crop_settings: CropSettings
+    _p1: Point
+    _p2: Point
+    _initial_point_is_set: bool
+
+    def __init__(self) -> None:
+        self._crop_settings = CropSettings()
+        self._p1 = (0, 0)
+        self._p2 = (0, 0)
+        self._initial_point_is_set = False
+
+    @property
+    def settings(self) -> CropSettings:
+        return self._crop_settings
 
     def mouse_cb(
         self,
@@ -35,41 +45,65 @@ class CropSelector:
         _ = user_data
 
         if event == cv2.EVENT_LBUTTONDOWN and not self._initial_point_is_set:
-            self.crop_start = (x, y)
+            self._p1 = (x, y)
             self._initial_point_is_set = True
 
         if event == cv2.EVENT_MOUSEMOVE and self._initial_point_is_set:
-            self.crop_end = (x, y)
+            self._p2 = (x, y)
 
         if event == cv2.EVENT_LBUTTONUP:
             self._initial_point_is_set = False
+            self._sort_settings(start=self._p1, end=self._p2)
 
-    # _typing.Callable[[tuple[int] | tuple[int, _typing.Any]], None]
-    def save_cb(self, x: tuple[int] | tuple[int, Any], user_data: Any) -> None:  # pyright: ignore[reportExplicitAny, reportAny]
-        logger.info(x)
-        logger.info(user_data)  # pyright: ignore[reportAny]
+    def _sort_settings(self, start: Point, end: Point) -> None: # ensure that start is always smaller than end
+        if start[0] > self._crop_settings.start_x and start[1] > self._crop_settings.end_x:
+            tmp = self._crop_settings.end_x
+            self._crop_settings.end_x = start[0]
+            self._crop_settings.start_x = tmp
+        else:
+            self._crop_settings.start_x = start[0]
+        if start[1] > self._crop_settings.start_y and start[1] > self._crop_settings.end_y:
+            tmp = self._crop_settings.end_y
+            self._crop_settings.end_y = start[1]
+            self._crop_settings.start_y = tmp
+        else:
+            self._crop_settings.start_y = start[1]
+
+        if end[0] < self._crop_settings.start_x and end[0] < self._crop_settings.end_x:
+            tmp = self._crop_settings.start_x
+            self._crop_settings.start_x = end[0]
+            self._crop_settings.end_x = tmp
+        else:
+            self._crop_settings.end_x = end[0]
+
+        if end[1] < self._crop_settings.start_y and end[0] < self._crop_settings.end_y:
+            tmp = self._crop_settings.start_y
+            self._crop_settings.start_y = end[1]
+            self._crop_settings.end_y = tmp
+        else:
+            self._crop_settings.end_y = end[1]
 
     # TODO: figure out why the selection gets too large when retuning a `Rect`
     def get_selected_rect(self) -> tuple[Point, Point] | None:
         # I wanna throw up
         # TODO: Use any()?
         if (
-            self.crop_start[0] > 0
-            and self.crop_start[1] > 0
-            and self.crop_end[0] > 0
-            and self.crop_end[1] > 0
+            self._p1[0] < 0
+            or self._p1[0] < 0
+            or self._p2[0] < 0
+            or self._p2[1] < 0
         ):
-            return (self.crop_start, self.crop_end)
-        return None
+            return None
+        return (self._p1, self._p2)
 
     @override
     def __repr__(self) -> str:
-        return f"crop_start{self.crop_start}, crop_end{self.crop_end}"
+        return f"crop_start{self._crop_settings.start}, crop_end{self._crop_settings.end}"
 
 
 class Cropper:
     _viewport: JointViewport
-    _crops: list[CropSelector]
+    _crops: list[CropSelector] = []
 
     class Config(StrEnum):
         WINDOW_NAME = "Flower Power - Cropping"
@@ -94,16 +128,15 @@ class Cropper:
         return cur_stream_id
 
     @staticmethod
-    def save(file_name: Path, crop: CropSelector) -> None:
+    def save(file_name: Path, settings: CropSettings) -> None:
         """
-        Save current CropSelector to JSON file.
+        Save current CropSelector to JSON file, it will overwrite the file if it already exists.
         """
-        data = msgspec.json.encode(crop)
 
-        path = Settings.CROP_SAVE_DIR.joinpath(file_name).joinpath(".crop")
+        path = Settings.CROP_SAVE_DIR.joinpath(file_name)
         path.parents[0].mkdir(exist_ok=True)
-        _ = path.write_bytes(data)
-        logger.info(f"wrote crop settings to file {path.as_posix()} {crop}")
+        _ = path.write_bytes(settings.encode())
+        logger.info(f"wrote crop settings to file {path.as_posix()} {settings}")
 
     @staticmethod
     def _put_text(frame: MatLike, text: str, p: Point, font_size: float = 1.0) -> None:
@@ -156,7 +189,7 @@ class Cropper:
                     stream_id, -1, self._viewport.stream_count
                 )
             if key_state & 0xFF == ord("s"):
-                self.save(Path(current_stream.get_identifier()), crop_selector)
+                self.save(Path(current_stream.get_identifier()), crop_selector.settings)
             if key_state & 0xFF == ord("q"):
                 break
 
