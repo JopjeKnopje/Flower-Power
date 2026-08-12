@@ -177,6 +177,10 @@ class VideoStream:
     def height(self) -> int:
         return int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+    @property
+    def video_source_uri(self) -> str:
+        return str(self._video_src.uri)
+
     def read(self) -> MatLike:
         return self._q.get(timeout=1)
 

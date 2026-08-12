@@ -77,30 +77,38 @@ class Cropper:
     def loop(
         self,
     ) -> None:
-        current_stream_id: int = 0
+        cur_stream_id: int = 0
 
         while self._viewport.is_open():
             # get a specific stream instead of the whole joined view
-            current_stream = self._viewport.get_stream(current_stream_id)
+            current_stream = self._viewport.get_stream(cur_stream_id)
             try:
                 frame = current_stream.read()
             except Exception as e:
                 logger.error(f"_viewport.read failed {e}")
                 continue
 
-            # height, width, _ = frame.shape  # pyright: ignore[reportAny]
             # logger.info("imshow")
-            cv2.imshow("Cropping", frame)
+            _ = cv2.putText(
+                frame,
+                current_stream.video_source_uri,
+                (0, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.0,
+                (0, 0, 200),
+                2,
+                cv2.LINE_AA,
+            )
 
+            cv2.imshow("Cropping", frame)
             key_state = cv2.waitKey(1)
             if key_state & 0xFF == ord("."):
-                current_stream_id = Cropper._cycle_stream(
-                    current_stream_id, 1, self._viewport.stream_count
+                cur_stream_id = Cropper._cycle_stream(
+                    cur_stream_id, 1, self._viewport.stream_count
                 )
-                logger.error("yup")
             if key_state & 0xFF == ord(","):
-                current_stream_id = Cropper._cycle_stream(
-                    current_stream_id, -1, self._viewport.stream_count
+                cur_stream_id = Cropper._cycle_stream(
+                    cur_stream_id, -1, self._viewport.stream_count
                 )
             if key_state & 0xFF == ord("q"):
                 break
