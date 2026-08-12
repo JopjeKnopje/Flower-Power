@@ -1,15 +1,18 @@
+from enum import Enum, StrEnum
+import importlib
 import platform
 import sys
 
 from cyclopts import App
 from torch.cuda import is_available as cuda_is_avaliable
 
+import image_harvester
 from image_harvester.cropper import Cropper
 from image_harvester.flower_api import Flower
 from image_harvester.flower_config import FlowerConfig
 from image_harvester.harvester import Harvester
 from image_harvester.logs import logger_init
-from image_harvester.processor import PeopleCounter
+from image_harvester.processor import AbstractProcessor, PeopleCounter, Processor
 
 cli = App()
 
@@ -37,9 +40,19 @@ def crop() -> None:
     crop.loop()
 
 
+def list_processors() -> list[str]:
+    return [cls.__name__ for cls in AbstractProcessor.__subclasses__()]
+
+ProcessorName = StrEnum("ProcessorName", list_processors())
+
+def get_processor_type_by_name(name: ProcessorName) -> type[AbstractProcessor]:
+    return getattr(importlib.import_module("image_harvester.processor"), name)  # pyright: ignore[reportAny]
+
+
+
 # TODO: Add gui override
 @cli.default
-def run() -> None:
+def run(processor: ProcessorName) -> None:
     """
     Run the flower code
     """
@@ -50,8 +63,7 @@ def run() -> None:
 
     api = Flower(config.flower_endpoint)
 
-    # proc = Processor(api)
-    proc = PeopleCounter(api)
+    proc = get_processor_type_by_name(processor)(api)
 
     is_headless = host_is_headless()
     yolo_device = "cuda"
