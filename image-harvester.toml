@@ -2,13 +2,17 @@ flower_endpoint = "http://localhost:9000"
 yolo_verbose = false
 # recording_dir = "sample_recordings_fr"
 
-
-
-
 [[cameras]]
+uri = "192.168.0.2"
+[[cameras]]
+uri = "192.168.0.3"
+
+
+
+# [[cameras]]
 # uri = "192.168.1.2"
 # uri = "/home/joppe/Videos/untitled.mp4"
-uri = "test-vids/office_people.mp4"
+# uri = "test-vids/office_people.mp4"
 # uri = "sample_recordings_fr/close.png"
 # uri = "sample_recordings_fr/cam-0-0.avi"
 
