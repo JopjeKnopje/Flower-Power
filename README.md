@@ -150,6 +150,8 @@ Set the password to `admin`
 Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
 We'd run the program like `image-harvester crop`
 
+- [ ] Just file to pussh calibration files
+- [ ] Fix crash when connection error (flower offline or incorrect page)
 - [ ] Fix fonts
 - [ ] The cropper should be `VideoSource` agnostic, it currently only works for `VideoSourceRTP`.
 - [ ] Crop images to remove sky, join images together to optimize space.
