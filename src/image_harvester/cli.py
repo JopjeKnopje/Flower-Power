@@ -1,7 +1,7 @@
 from cyclopts import App
 from torch.cuda import is_available as cuda_is_avaliable
 from image_harvester.app import host_is_headless
-from image_harvester.config import FlowerConfig
+from image_harvester.flower_config import FlowerConfig
 from image_harvester.flower_api import Flower
 from image_harvester.harvester import Harvester
 from image_harvester.processor import Processor
