@@ -34,6 +34,7 @@ class JointViewport:
     def read_stream(self, id: int) -> MatLike:
         return self.get_stream(id).read()
 
+    # TODO: optionally pass list of crops
     def read(self) -> MatLike:
         imgs: list[MatLike] = []
 

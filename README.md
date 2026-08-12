@@ -145,6 +145,7 @@ We'd run the program like `image-harvester calibrate`
 
 - [ ] Fix fonts
 - [ ] Crop images to remove sky, join images together to optimize space.
+- [ ] Don't die when camara disconnects
 - [ ] Use predict instead of track
 - [ ] Use optimized model format for PI / edge devices
 - [ ] Stream/log datapoints
