@@ -33,6 +33,8 @@ uv run image-harvester crop
 ```bash
 uv run image-harvester
 ```
+## Cloning onto the PI
+The PI wont have internet access, you can SSH into it with user `joppe` and passwd `123zegikniet`. We will ofc change this after the event hehe.
 
 
 
