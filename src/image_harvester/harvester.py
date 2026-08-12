@@ -9,7 +9,7 @@ from ultralytics import YOLO
 from pathlib import Path
 
 
-from image_harvester.config import Camera, FlowerConfig
+from image_harvester.flower_config import Camera, FlowerConfig
 from image_harvester.logs import logger_init
 from image_harvester.video import VideoSource, VideoStream
 
