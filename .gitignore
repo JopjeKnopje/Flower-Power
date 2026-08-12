@@ -4,8 +4,7 @@
 
 crop-settings/
 test-vids/
-sample_recordings/
-sample_recordings_fr/
+sample_recordings*/
 # don't wanna commit that UNIT
 yolo26n.pt
 dist/
