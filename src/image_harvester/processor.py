@@ -1,4 +1,6 @@
+from abc import ABC, abstractmethod
 from collections import deque
+from typing import override
 
 import cv2
 from cv2.typing import MatLike
@@ -7,7 +9,6 @@ import httpx
 from image_harvester.flower_api import Flower
 
 # TODO: Use timeit timer instead?
-from image_harvester.harvester import Vec4f
 from image_harvester.logs import logger_init
 from image_harvester.smoothing import sma
 from image_harvester.timer import Timer
@@ -15,12 +16,26 @@ from image_harvester.timer import Timer
 logger = logger_init()
 
 
-class Processor:
+type Vec4f = tuple[float, float, float, float]
+
+
+class AbstractProcessor(ABC):
+    def __init__(self, api: Flower) -> None:
+        self._api: Flower = api
+
+    @abstractmethod
+    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None: ...
+
+    @abstractmethod
+    def skipped(self) -> None: ...
+
+
+class Processor(AbstractProcessor):
     _REQUEST_INTERVAL_MS: int = 2000
     _DEQUE_SIZE: int = 20
 
     def __init__(self, api: Flower) -> None:
-        self._api: Flower = api
+        super().__init__(api)
 
         self._sma_output_list: list[float] = []
 
@@ -28,6 +43,7 @@ class Processor:
         self._data_raw_ringbuf: deque[float] = deque(maxlen=self._DEQUE_SIZE)
         self._timer: Timer = Timer()
 
+    @override
     def skipped(self) -> None:
         logger.warning("skipped processing, no one detected")
 
@@ -42,6 +58,7 @@ class Processor:
 
             self._timer.start()
 
+    @override
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
         height, width, _ = frame.shape  # pyright: ignore[reportAny]
         value: float = 0
@@ -78,13 +95,14 @@ class Processor:
             raise Exception("_points.maxlen not set, cannot perform sma")
 
 
-class PeopleCounter:
+class PeopleCounter(AbstractProcessor):
     _REQUEST_INTERVAL_MS: int = 2000
 
     def __init__(self, api: Flower) -> None:
-        self._api: Flower = api
+        super().__init__(api)
         self._timer: Timer = Timer()
 
+    @override
     def skipped(self) -> None:
         logger.warning("skipped processing, no one detected")
 
@@ -99,6 +117,7 @@ class PeopleCounter:
 
             self._timer.start()
 
+    @override
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
         _ = frame
         # TODO: Maybe we do some smoothing here?

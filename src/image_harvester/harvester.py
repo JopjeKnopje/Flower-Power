@@ -1,23 +1,19 @@
-from __future__ import annotations
 from dataclasses import dataclass
-from typing import Literal, Protocol, Self
-import typing
+from pathlib import Path
+from typing import Literal, Self, cast
 
-from image_harvester.settings import Settings
-from cv2.typing import MatLike, Point
 import cv2
 import msgspec
+from cv2.typing import MatLike, Point
 from ultralytics import YOLO
-from pathlib import Path
-
 
 from image_harvester.flower_config import Camera, FlowerConfig
 from image_harvester.logs import logger_init
+from image_harvester.processor import AbstractProcessor, Vec4f
+from image_harvester.settings import Settings
 from image_harvester.video import VideoSource, VideoStream
 
 logger = logger_init()
-
-type Vec4f = tuple[float, float, float, float]
 
 
 @dataclass
@@ -166,10 +162,6 @@ def recording_get_path(dir_path: Path, cam_id: int) -> Path:
 
 class Harvester:
     # TODO: Maybe use ABC?
-    class FrameProcessorType(Protocol):
-        def skipped(self) -> None: ...
-        def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None: ...
-
     def __init__(self, config: FlowerConfig) -> None:
         self._config: FlowerConfig = config
 
@@ -189,7 +181,7 @@ class Harvester:
 
     def loop(
         self,
-        processor: FrameProcessorType,
+        processor: AbstractProcessor,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:
@@ -213,7 +205,7 @@ class Harvester:
             # Get the boxes and track IDs
             if result.boxes and result.boxes.is_track:
                 boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
-                boxes = typing.cast(list[Vec4f], boxes)
+                boxes = cast(list[Vec4f], boxes)
                 processor.process(frame, boxes)
             else:
                 processor.skipped()
