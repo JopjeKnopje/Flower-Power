@@ -24,7 +24,12 @@ uv sync --all-packages
 
 3. Before running the image-harvester make sure that your machine can reach the cameras, see [reaching the cameras](#reaching-the-cameras).
 
-3. Run the image-harvester, it should automatically connect to the cameras.
+4. Optionally you can setup cropping for the camera feeds by running.
+```bash
+uv run image-harvester crop
+```
+
+5. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
 uv run image-harvester
 ```
