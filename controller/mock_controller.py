@@ -7,9 +7,13 @@
 Mock hydraulics controller for the Flower Power sculpture.
 
 Emulates the real Controllino-based HTTP API (controller.ino):
-    GET /status          -> JSON with current position
-    GET /move?band=N     -> move to band N (0-9), target = N*100+50 mm
-    GET /stop            -> stop movement
+    GET /status               -> JSON with position, fire and pattern state
+    GET /move?band=N          -> move to band N (0-9), target = N*100+50 mm
+    GET /stop                 -> stop movement
+    GET /fire?n=0,2,4&ms=250  -> pulse those fire relays for 250 ms
+    GET /fire?n=all&on=1      -> hold on (on=0 switches off again)
+    GET /swirl?on=1           -> start/stop the swirl sequence
+    GET /bloom?on=1           -> start/stop the bloom sequence
 
 Physics:
     0 mm  = flower fully closed
@@ -37,6 +41,21 @@ TICK_S            = 0.05   # physics tick: 20 Hz
 STEP_MM           = VELOCITY_MM_PER_S * TICK_S  # 5 mm per tick
 DEADBAND_MM       = 3.0
 
+# ── Fire relays and patterns, mirrored from controller.ino ───────────────────
+FIRE_COUNT   = 5
+FIRE_ALL     = (1 << FIRE_COUNT) - 1
+FIRE_HOLD    = float("inf")  # "on until switched off"
+
+SWIRL_PULSE_S     = 0.150
+SWIRL_GAP_START_S = 2.0
+SWIRL_GAP_STEP_S  = 0.5
+SWIRL_RECHARGE_S  = 6.0
+SWIRL_FINALE_S    = 2.0
+
+BLOOM_PULSE_S  = 0.250
+BLOOM_HYST_MM  = 25.0
+BLOOM_RINGS    = ((2, 2), (1, 3), (0, 4))
+
 # ADC calibration mirrored from controller.ino
 _CAL_ADC_0MM    = 807
 _CAL_ADC_1000MM = 761
@@ -45,6 +64,18 @@ _CAL_ADC_1000MM = 761
 def _mm_to_adc(mm: float) -> int:
     t = max(0.0, min(1.0, mm / 1000.0))
     return round(_CAL_ADC_0MM + t * (_CAL_ADC_1000MM - _CAL_ADC_0MM))
+
+
+def _parse_fire_mask(v: str) -> int | None:
+    """"0,2,4" or "all" / "*" -> bitmask, None if unparsable."""
+    if v in ("all", "*"):
+        return FIRE_ALL
+    mask = 0
+    for part in v.replace("+", ",").split(","):
+        if not part.isdigit() or int(part) >= FIRE_COUNT:
+            return None
+        mask |= 1 << int(part)
+    return mask or None
 
 
 # ── ASCII hand-fan frames (11 stages: 0, 100, 200, …, 1000 mm) ──────────────
@@ -182,7 +213,14 @@ def _box(text: str = "") -> str:
     return "|" + text.center(_BOX_W - 2) + "|"
 
 
-def _render(pos: float, target: float | None, moving: bool) -> str:
+def _render(
+    pos: float,
+    target: float | None,
+    moving: bool,
+    fire: tuple[bool, ...] = (False,) * FIRE_COUNT,
+    swirl: bool = False,
+    bloom: bool = False,
+) -> str:
     idx = min(10, max(0, round(pos / 100)))
     rows: list[str] = []
 
@@ -206,6 +244,12 @@ def _render(pos: float, target: float | None, moving: bool) -> str:
         status = f"STOPPED  at  {pos:6.1f} mm"
     rows.append(_box(status))
 
+    # Fire relays, plus whichever pattern is driving them
+    flames = "  ".join("(*)" if f else "( )" for f in fire)
+    pattern = "  ".join(p for p, on in (("SWIRL", swirl), ("BLOOM", bloom)) if on)
+    rows.append(_box(f"FIRE  {flames}"))
+    rows.append(_box(pattern))
+
     # Progress bar  0 mm ──────────────── 1000 mm
     # inner width = BOX_W - 2 borders - 2+2 padding - 2 brackets = BOX_W - 8
     bar_w = _BOX_W - 8
@@ -225,14 +269,35 @@ def _render(pos: float, target: float | None, moving: bool) -> str:
 
 class _State:
     def __init__(self) -> None:
-        self._lock     = threading.Lock()
+        # Reentrant: tick() holds the lock while calling the fire helpers
+        self._lock     = threading.RLock()
         self.pos_mm: float   = 0.0
         self.target_mm: float = 0.0
         self.moving: bool    = False
 
+        # Requested state per relay: 0 = off, FIRE_HOLD, or the monotonic
+        # deadline at which it goes off again
+        self.fire_until: list[float] = [0.0] * FIRE_COUNT
+
+        self.swirl_running = False
+        self.swirl_reverse = False
+        self.swirl_finale  = False
+        self.swirl_step    = 0
+        self.swirl_gap     = SWIRL_GAP_START_S
+        self.swirl_next_at = 0.0
+
+        self.bloom_active = False
+        self.bloom_ring   = -1
+
     def snapshot(self) -> tuple[float, float, bool]:
         with self._lock:
             return self.pos_mm, self.target_mm, self.moving
+
+    def fire_snapshot(self) -> tuple[tuple[bool, ...], bool, bool]:
+        with self._lock:
+            now = time.monotonic()
+            fire = tuple(u > now for u in self.fire_until)
+            return fire, self.swirl_running, self.bloom_active
 
     def set_target(self, target: float) -> None:
         with self._lock:
@@ -243,9 +308,96 @@ class _State:
         with self._lock:
             self.moving = False
 
-    def tick(self) -> bool:
-        """Advance position by one simulation tick. Returns True while moving."""
+    # ── Fire ────────────────────────────────────────────────────────────────
+    def fire(self, mask: int, seconds: float) -> None:
         with self._lock:
+            until = FIRE_HOLD if seconds == FIRE_HOLD else time.monotonic() + seconds
+            for i in range(FIRE_COUNT):
+                if mask & (1 << i):
+                    self.fire_until[i] = until
+
+    def stop_fire(self, mask: int) -> None:
+        with self._lock:
+            for i in range(FIRE_COUNT):
+                if mask & (1 << i):
+                    self.fire_until[i] = 0.0
+
+    def fire_all_off(self) -> None:
+        with self._lock:
+            self.swirl_start(False)
+            self.bloom_start(False)
+            self.fire_until = [0.0] * FIRE_COUNT
+
+    # ── Patterns ────────────────────────────────────────────────────────────
+    def swirl_start(self, on: bool = True) -> None:
+        with self._lock:
+            if on:
+                self.swirl_running = True
+                self.swirl_finale  = False
+                self.swirl_step    = 0
+                self.swirl_gap     = SWIRL_GAP_START_S
+                self.swirl_next_at = time.monotonic()
+            elif self.swirl_running:
+                self.swirl_running = False
+                self.swirl_finale  = False
+                self.swirl_reverse = not self.swirl_reverse
+
+    def bloom_start(self, on: bool = True) -> None:
+        with self._lock:
+            self.bloom_active = on
+            if on:
+                self.bloom_ring = -1
+
+    def _update_swirl(self, now: float) -> None:
+        if not self.swirl_running or now < self.swirl_next_at:
+            return
+
+        if self.swirl_finale:
+            self.fire(FIRE_ALL, SWIRL_FINALE_S)
+            self.swirl_start(False)
+            return
+
+        if self.swirl_step >= FIRE_COUNT:
+            if self.swirl_gap <= SWIRL_GAP_STEP_S:
+                self.swirl_finale  = True
+                self.swirl_next_at = now + SWIRL_RECHARGE_S
+                return
+            self.swirl_gap -= SWIRL_GAP_STEP_S
+            self.swirl_step = 0
+
+        # Hop 2 of 5 nodes = 144 deg, the closest this ring gets to the golden angle
+        stride = FIRE_COUNT - 2 if self.swirl_reverse else 2
+        self.fire(1 << ((self.swirl_step * stride) % FIRE_COUNT), SWIRL_PULSE_S)
+        self.swirl_next_at = now + SWIRL_PULSE_S + self.swirl_gap
+        self.swirl_step += 1
+
+    def _update_bloom(self) -> None:
+        if not self.bloom_active:
+            return
+
+        width = 1000.0 / len(BLOOM_RINGS)
+        r = max(0, self.bloom_ring)
+        while r < len(BLOOM_RINGS) - 1 and self.pos_mm > (r + 1) * width + BLOOM_HYST_MM:
+            r += 1
+        while r > 0 and self.pos_mm < r * width - BLOOM_HYST_MM:
+            r -= 1
+        if r == self.bloom_ring:
+            return
+        self.bloom_ring = r
+
+        a, b = BLOOM_RINGS[r]
+        self.fire((1 << a) | (1 << b), BLOOM_PULSE_S)
+
+    def tick(self) -> bool:
+        """Advance one simulation tick. Returns True while moving."""
+        with self._lock:
+            now = time.monotonic()
+            for i, until in enumerate(self.fire_until):
+                if until != FIRE_HOLD and now >= until:
+                    self.fire_until[i] = 0.0
+            self._update_swirl(now)
+            self._update_bloom()
+
             if not self.moving:
                 return False
             error = self.target_mm - self.pos_mm
@@ -266,9 +418,16 @@ _print_lock        = threading.Lock()
 _last_frame_lines  = 0
 
 
-def _print_frame(pos: float, target: float | None, moving: bool) -> None:
+def _print_frame(
+    pos: float,
+    target: float | None,
+    moving: bool,
+    fire: tuple[bool, ...] = (False,) * FIRE_COUNT,
+    swirl: bool = False,
+    bloom: bool = False,
+) -> None:
     global _last_frame_lines
-    screen = _render(pos, target, moving)
+    screen = _render(pos, target, moving, fire, swirl, bloom)
     line_count = screen.count("\n") + 1
     with _print_lock:
         if _last_frame_lines:
@@ -283,17 +442,20 @@ def _movement_loop() -> None:
     """Background thread: drives physics simulation and terminal animation."""
     prev_idx    = -1
     prev_moving = None
+    prev_fire: tuple[object, ...] = ()
 
     while True:
         _state.tick()
         pos, target, moving = _state.snapshot()
+        fire, swirl, bloom = _state.fire_snapshot()
         idx = min(10, max(0, round(pos / 100)))
 
-        # Only redraw when the flower stage or movement status changes
-        if idx != prev_idx or moving != prev_moving:
-            _print_frame(pos, target if moving else None, moving)
+        # Only redraw when the flower stage, movement or fire state changes
+        if idx != prev_idx or moving != prev_moving or (*fire, swirl, bloom) != prev_fire:
+            _print_frame(pos, target if moving else None, moving, fire, swirl, bloom)
             prev_idx    = idx
             prev_moving = moving
+            prev_fire   = (*fire, swirl, bloom)
 
         time.sleep(TICK_S)
 
@@ -316,6 +478,7 @@ class _Handler(BaseHTTPRequestHandler):
     def _build_status(
         self, pos: float, target: float | None, moving: bool
     ) -> dict:
+        fire, swirl, bloom = _state.fire_snapshot()
         data: dict = {
             "stroke_mm": round(pos, 1),
             "adc": _mm_to_adc(pos),
@@ -323,11 +486,15 @@ class _Handler(BaseHTTPRequestHandler):
         }
         if moving and target is not None:
             data["target_mm"] = round(target, 0)
+        data["fire"] = [int(f) for f in fire]
+        data["swirl"] = swirl
+        data["bloom"] = bloom
         return data
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
-        params = parse_qs(parsed.query)
+        # keep_blank_values so value-less flags like ?on / ?off survive
+        params = parse_qs(parsed.query, keep_blank_values=True)
         pos, target, moving = _state.snapshot()
 
         if parsed.path == "/status":
@@ -357,6 +524,31 @@ class _Handler(BaseHTTPRequestHandler):
             pos, target, moving = _state.snapshot()
             self._send_json(200, self._build_status(pos, None, False))
 
+        elif parsed.path == "/fire":
+            mask = _parse_fire_mask(params.get("n", [""])[0])
+            if mask is None:
+                self._send_json(
+                    400, {"error": f"n must be 0-{FIRE_COUNT - 1} list or all"}
+                )
+                return
+            if "off" in params:
+                # clearing everything also clears the patterns feeding it
+                _state.fire_all_off() if mask == FIRE_ALL else _state.stop_fire(mask)
+            elif "on" in params:
+                _state.fire(mask, FIRE_HOLD)
+            else:
+                try:
+                    seconds = int(params.get("ms", [""])[0]) / 1000.0
+                except ValueError:
+                    seconds = SWIRL_PULSE_S
+                _state.fire(mask, seconds)
+            self._send_json(200, self._build_status(pos, target, moving))
+
+        elif parsed.path in ("/swirl", "/bloom"):
+            start = _state.swirl_start if parsed.path == "/swirl" else _state.bloom_start
+            start("on" in params)
+            self._send_json(200, self._build_status(pos, target, moving))
+
         else:
             self._send_json(404, {"error": "not found"})
 
@@ -376,9 +568,13 @@ def main() -> None:
     print("Flower Power - Mock Hydraulic Controller")
     print(f"  http://{display_host}:{args.port}")
     print()
-    print("  GET /status          current position (JSON)")
-    print("  GET /move?band=N     move to band N (0-9) -> N*100+50 mm")
-    print("  GET /stop            stop movement")
+    print("  GET /status               current state (JSON)")
+    print("  GET /move?band=N          move to band N (0-9) -> N*100+50 mm")
+    print("  GET /stop                 stop movement")
+    print("  GET /fire?n=0,2,4[&ms=X]  pulse those relays (default 150 ms)")
+    print("  GET /fire?n=all&on        latch on   (&off switches off again)")
+    print("  GET /swirl?on             swirl sequence (?off to stop)")
+    print("  GET /bloom?on             bloom sequence (?off to stop)")
     print()
     print("  Ctrl-C to quit")
     print()
