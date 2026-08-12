@@ -149,9 +149,9 @@ Select which camera frame we wanna modify and set a horizontal crop line for tha
 We'd run the program like `image-harvester crop`
 
 - [ ] Fix fonts
+- [ ] The cropper should be `VideoSource` agnostic, it currently only works for `VideoSourceRTP`.
 - [ ] Crop images to remove sky, join images together to optimize space.
 - [ ] Don't die when camara disconnects
-- [ ] The cropper should be `VideoSource` agnostic, it currently only works for `VideoSourceRTP`.
 - [ ] Use predict instead of track
 - [ ] Use optimized model format for PI / edge devices
 - [ ] Stream/log datapoints
