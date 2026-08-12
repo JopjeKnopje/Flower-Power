@@ -29,7 +29,7 @@ dev = [
 ]
 
 [project.scripts]
-image-harvester = "image_harvester:main"
+image-harvester = "image_harvester:cli"
 plotter = "image_harvester:plotter"
 ping-test = "image_harvester:ping"
 formula = "image_harvester:formula"

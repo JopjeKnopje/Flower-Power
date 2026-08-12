@@ -1,8 +1,8 @@
-from .cli import main
+from .cli import cli
 from .tools import ping
 from .formula import formula
 from .plotter import plotter
 
 
 # export our functions
-__all__ = ["main", "ping", "formula", "plotter"]
+__all__ = ["cli", "ping", "formula", "plotter"]
