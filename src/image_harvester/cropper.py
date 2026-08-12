@@ -120,6 +120,7 @@ class Cropper:
         stream_id: int = 0
 
         cv2.namedWindow(self.Config.WINDOW_NAME)
+        cv2.setMouseCallback(self.Config.WINDOW_NAME, self._crops[0].mouse_cb)
         while self._viewport.is_open():
             # get a specific stream rather than the whole joined-view
             current_stream = self._viewport.get_stream(stream_id)
