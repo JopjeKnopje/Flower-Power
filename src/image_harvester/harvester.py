@@ -20,28 +20,35 @@ type Vec4f = tuple[float, float, float, float]
 
 @dataclass
 class JointViewport:
-    video_streams: list[VideoStream]
+    _video_streams: list[VideoStream]
 
     def is_open(self) -> bool:
-        for s in self.video_streams:
+        for s in self._video_streams:
             if not s.is_open():
                 return False
         return True
 
+    def get_stream(self, id: int = 0) -> VideoStream:
+        return self._video_streams[id]
+
     def read_stream(self, id: int) -> MatLike:
-        return self.video_streams[id].read()
+        return self.get_stream(id).read()
 
     def read(self) -> MatLike:
         imgs: list[MatLike] = []
 
-        for i, _ in enumerate(self.video_streams):
+        for i, _ in enumerate(self._video_streams):
             img = self.read_stream(i)
 
             imgs.append(img)
         return cv2.hconcat(imgs)
 
+    @property
+    def stream_count(self) -> int:
+        return len(self._video_streams)
+
     def release(self) -> None:
-        for s in self.video_streams:
+        for s in self._video_streams:
             s.release()
 
 

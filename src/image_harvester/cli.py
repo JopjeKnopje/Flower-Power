@@ -2,6 +2,7 @@ from cyclopts import App
 from torch.cuda import is_available as cuda_is_avaliable
 from image_harvester.app import host_is_headless
 from image_harvester.flower_config import FlowerConfig
+from image_harvester.cropper import Cropper
 from image_harvester.flower_api import Flower
 from image_harvester.harvester import Harvester
 from image_harvester.processor import Processor
@@ -11,13 +12,19 @@ cli = App()
 
 
 @cli.command
-def calibrate() -> None:
+def crop() -> None:
     """
     Open a UI in which you can crop camera feeds and save them into a JSON file.
     """
 
+    if host_is_headless():
+        raise RuntimeError("cannot open gui on headless device")
+
     config = FlowerConfig.read()
     print(config)
+
+    crop = Cropper(config.cameras)
+    crop.loop()
 
 
 # TODO: Add gui override
