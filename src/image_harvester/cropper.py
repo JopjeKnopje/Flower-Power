@@ -5,7 +5,7 @@ import msgspec
 
 from attr import dataclass
 import cv2
-from cv2.typing import Point
+from cv2.typing import MatLike, Point
 
 
 from image_harvester.flower_config import Camera
@@ -108,11 +108,23 @@ class Cropper:
         """
         data = msgspec.json.encode(crop)
 
-        path = Settings.CROP_SAVE_DIR.joinpath(file_name)
+        path = Settings.CROP_SAVE_DIR.joinpath(file_name).joinpath(".crop")
         path.parents[0].mkdir(exist_ok=True)
         _ = path.write_bytes(data)
         logger.info(f"wrote crop settings to file {path.as_posix()} {crop}")
-        #     _ = f.write(data)
+
+    @staticmethod
+    def _put_text(frame: MatLike, text: str, p: Point, font_size: float = 1.0) -> None:
+        _ = cv2.putText(
+            frame,
+            text,
+            p,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            font_size,
+            (0, 0, 200),
+            2,
+            cv2.LINE_AA,
+        )
 
     def loop(
         self,
@@ -134,18 +146,12 @@ class Cropper:
             rect = crop_selector.get_selected_rect()
             if rect:
                 _ = cv2.rectangle(frame, rect[0], rect[1], 0, 2)
-                # TODO: Print selection window size
+                width = abs(rect[0][0] - rect[1][0])
+                height = abs(rect[0][1] - rect[1][1])
+                self._put_text(frame, f"w: {width}", (0, 70), 1.0)
+                self._put_text(frame, f"h: {height}", (0, 105), 1.0)
 
-            _ = cv2.putText(
-                frame,
-                current_stream.get_identifier(),
-                (0, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (0, 0, 200),
-                2,
-                cv2.LINE_AA,
-            )
+            self._put_text(frame, current_stream.get_identifier(), (0, 30))
 
             cv2.imshow(self.Config.WINDOW_NAME, frame)
             key_state = cv2.waitKey(1)
