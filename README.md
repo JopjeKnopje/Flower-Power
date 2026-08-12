@@ -144,9 +144,9 @@ Set the password to `admin`
 
 
 ## Todo V2
-### Calibration mode
+### Crop mode
 Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
-We'd run the program like `image-harvester calibrate`
+We'd run the program like `image-harvester crop`
 
 - [ ] Fix fonts
 - [ ] Crop images to remove sky, join images together to optimize space.
