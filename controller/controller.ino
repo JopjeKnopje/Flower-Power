@@ -102,6 +102,9 @@ const float DEADBAND_MM = 25.0;
 // --- Auto-positioning ---
 bool autoMode = false;
 float targetMM = 0.0;
+// Set only when a band is actually reached. A remote extend/retract also clears
+// autoMode, so autoMode alone cannot tell arrival from a manual nudge.
+bool bandReached = false;
 
 // --- Remote drive requests ---
 bool remoteExtend = false;
@@ -196,6 +199,7 @@ void loop() {
     } else {
       driveStop();
       autoMode = false;
+      bandReached = true;
       Serial.print(">>> Reached target: ");
       Serial.print(targetMM, 0);
       Serial.println(" mm");
@@ -233,6 +237,7 @@ void loop() {
 void moveToBand(int band) {
   targetMM = band * 100.0 + 50.0;
   autoMode = true;
+  bandReached = false;
   Serial.print(">>> Moving to band ");
   Serial.print(band);
   Serial.print(", ");
@@ -648,8 +653,9 @@ void updateMain() {
     randomizeStages();
   }
 
-  // moveToBand() clears autoMode once the band is reached
-  if (mainStage < 0 || autoMode) return;
+  // Only a real arrival shows the number. A remote nudge clears autoMode too, and
+  // must not be mistaken for one; driving to a band by hand does count.
+  if (mainStage < 0 || !bandReached) return;
   mainShow();
 }
 
