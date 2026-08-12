@@ -9,18 +9,19 @@ import msgspec
 
 @dataclass
 class Status:
-    # TODO: or int?
-    stroke_mm: float
     adc: int
     auto: bool
+    stroke_mm: float
     target_mm: float | None = None
 
 
 class Flower:
     class _Endpoints(StrEnum):
+        people = "/people"
         status = "/status"
         move = "/move"
         stop = "/stop"
+        cnt = "/cnt"
 
     def __init__(self, endpoint: str) -> None:
         # TODO: Error handle the endpoint not containing http?
@@ -36,6 +37,14 @@ class Flower:
 
     def status(self) -> Status:
         content = self._http_get(self._Endpoints.status).content
+        return self._decode(content)
+
+    def count(self, value: int) -> Status:
+        content = self._http_get(self._Endpoints.cnt, {"n": str(value)}).content
+        return self._decode(content)
+
+    def people(self, value: int) -> Status:
+        content = self._http_get(self._Endpoints.people, {"n": str(value)}).content
         return self._decode(content)
 
     def move(self, pos: int) -> Status:

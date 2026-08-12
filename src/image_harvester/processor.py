@@ -76,3 +76,31 @@ class Processor:
             self.update_flower(int(sma_value))
         else:
             raise Exception("_points.maxlen not set, cannot perform sma")
+
+
+class PeopleCounter:
+    _REQUEST_INTERVAL_MS: int = 2000
+
+    def __init__(self, api: Flower) -> None:
+        self._api: Flower = api
+        self._timer: Timer = Timer()
+
+    def skipped(self) -> None:
+        logger.warning("skipped processing, no one detected")
+
+    # TODO: Run async of threaded?
+    def update_flower(self, pos: int) -> None:
+        self._timer.start_if_not_running()
+        if self._timer.delta() > self._REQUEST_INTERVAL_MS:
+            try:
+                _ = self._api.people(pos)
+            except httpx.ConnectError as e:
+                logger.exception(e)
+
+            self._timer.start()
+
+    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
+        _ = frame
+        # TODO: Maybe we do some smoothing here?
+        # just pass the info along to the flower
+        self.update_flower(len(boxes_n))
