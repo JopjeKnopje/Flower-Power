@@ -17,14 +17,6 @@ logger = logger_init()
 
 
 @dataclass
-class CropSettings:
-    y_start: int
-    x_start: int
-    width: int
-    height: int
-
-
-@dataclass
 class CropSelector:
     # TODO: Find way of doing a fixed size list, which still supports indexing
     crop_start: Point = (0, 0)
