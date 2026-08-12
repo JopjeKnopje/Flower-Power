@@ -58,6 +58,8 @@ class VideoSourceLocalPath(VideoSource):
 
 
 class VideoSourceRTP(VideoSource):
+    address: str | IPv4Address
+
     def __init__(
         self,
         address: str | IPv4Address,
@@ -65,6 +67,7 @@ class VideoSourceRTP(VideoSource):
         username: str,
         password: str,
     ) -> None:
+        self.address = address
         VideoSource.__init__(self, uri=f"rtsp://{username}:{password}@{address}{path}")
 
 
@@ -177,9 +180,10 @@ class VideoStream:
     def height(self) -> int:
         return int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    @property
-    def video_source_uri(self) -> str:
-        return str(self._video_src.uri)
+    def get_identifier(self) -> str:
+        if isinstance(self._video_src, VideoSourceRTP):
+            return str(self._video_src.address)
+        return str(self._video_src)
 
     def read(self) -> MatLike:
         return self._q.get(timeout=1)
