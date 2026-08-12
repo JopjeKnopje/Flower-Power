@@ -2,6 +2,7 @@
 .venv/
 .ruff_cache/
 
+crop-settings/
 test-vids/
 sample_recordings/
 sample_recordings_fr/
