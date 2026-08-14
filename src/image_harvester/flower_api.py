@@ -18,6 +18,7 @@ class Status:
 class Flower:
     class _Endpoints(StrEnum):
         people = "/people"
+        main = "/main"
         status = "/status"
         move = "/move"
         stop = "/stop"
@@ -27,7 +28,9 @@ class Flower:
         # TODO: Error handle the endpoint not containing http?
         self._endpoint: str = endpoint
 
-    def _http_get(self, path: str, params: dict[str, str] | None = None) -> Response:
+    def _http_get(
+        self, path: str, params: dict[str, str] | str | None = None
+    ) -> Response:
         resp = httpx.get(f"{self._endpoint}{path}", params=params).raise_for_status()
         return resp
 
@@ -43,8 +46,17 @@ class Flower:
         content = self._http_get(self._Endpoints.cnt, {"n": str(value)}).content
         return self._decode(content)
 
+    def main_mode(self, enable: bool) -> Status:
+        if enable:
+            args = "on"
+        else:
+            args = "off"
+        content = self._http_get(self._Endpoints.main, args).content
+        return self._decode(content)
+
     def people(self, value: int) -> Status:
         content = self._http_get(self._Endpoints.people, {"n": str(value)}).content
+        print(content)
         return self._decode(content)
 
     def move(self, pos: int) -> Status:
