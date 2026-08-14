@@ -1,4 +1,4 @@
-flower_endpoint = "http://localhost:9000"
+flower_endpoint = "http://192.168.0.42"
 yolo_verbose = false
 # recording_dir = "sample_recordings_fr"
 
@@ -6,6 +6,8 @@ yolo_verbose = false
 uri = "192.168.0.2"
 [[cameras]]
 uri = "192.168.0.3"
+[[cameras]]
+uri = "192.168.0.4"
 
 
 
