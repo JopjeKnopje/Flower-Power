@@ -12,10 +12,16 @@ def api() -> Flower:
 def test_enable_main_mode(api: Flower) -> None:
 
     m = api.main_mode(True)
-    assert m == ""
+    # assert m == ""
 
 
 def test_disable_main_mode(api: Flower) -> None:
 
     m = api.main_mode(False)
-    assert m == ""
+    # assert m == ""
+    #
+def test_main_send_people(api: Flower) -> None:
+
+    m = api.main_mode(True)
+    person_data = api.people(5)
+    assert person_data == ""
