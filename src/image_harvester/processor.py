@@ -15,9 +15,9 @@ from image_harvester.timer import Timer
 logger = logger_init()
 
 
-class Processor:
-    _REQUEST_INTERVAL_MS: int = 2000
-    _DEQUE_SIZE: int = 20
+class CloseProcessor:
+    _REQUEST_INTERVAL_MS: int = 1000
+    _DEQUE_SIZE: int = 1
 
     def __init__(self, api: Flower) -> None:
         self._api: Flower = api
@@ -29,7 +29,8 @@ class Processor:
         self._timer: Timer = Timer()
 
     def skipped(self) -> None:
-        logger.warning("skipped processing, no one detected")
+        # logger.warning("skipped processing, no one detected")
+        ...
 
     # TODO: Run async of threaded?
     def update_flower(self, pos: int) -> None:
@@ -66,7 +67,7 @@ class Processor:
         self._data_raw_ringbuf.append(value + 0.5)
         self._data_raw.append(value)
         if self._data_raw_ringbuf.maxlen is not None:
-            logger.info("starting sma")
+            # logger.info("starting sma")
             sma_list = list(self._data_raw_ringbuf)
             sma_value = sma(sma_list, self._data_raw_ringbuf.maxlen)[-1]
             self._sma_output_list.append(sma_value)
@@ -79,20 +80,22 @@ class Processor:
 
 
 class PeopleCounter:
-    _REQUEST_INTERVAL_MS: int = 2000
+    _REQUEST_INTERVAL_MS: int = 1000
 
     def __init__(self, api: Flower) -> None:
         self._api: Flower = api
         self._timer: Timer = Timer()
 
     def skipped(self) -> None:
-        logger.warning("skipped processing, no one detected")
+        ...
+        # logger.warning("skipped processing, no one detected")
 
     # TODO: Run async of threaded?
     def update_flower(self, pos: int) -> None:
         self._timer.start_if_not_running()
         if self._timer.delta() > self._REQUEST_INTERVAL_MS:
             try:
+                logger.info(f"sending people count {pos}")
                 _ = self._api.people(pos)
             except httpx.ConnectError as e:
                 logger.exception(e)

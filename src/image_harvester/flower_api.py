@@ -45,8 +45,8 @@ class Flower:
     def count(self, value: int) -> Status:
         content = self._http_get(self._Endpoints.cnt, {"n": str(value)}).content
         return self._decode(content)
-
     def main_mode(self, enable: bool) -> Status:
+
         if enable:
             args = "on"
         else:
@@ -56,7 +56,6 @@ class Flower:
 
     def people(self, value: int) -> Status:
         content = self._http_get(self._Endpoints.people, {"n": str(value)}).content
-        print(content)
         return self._decode(content)
 
     def move(self, pos: int) -> Status:
