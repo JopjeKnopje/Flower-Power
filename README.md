@@ -4,6 +4,8 @@ This repo contains packages and tooling for the Flower Power project, currently 
 
 Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of humans it detects. And output that value to the hydraulic controller using HTTP requests.
 
+NOTE: TO RUN ON YOUR LAPTOP DIRSABLE DSNMASSQ AND NETWORKMANAGER OTHERWISE YOUR STATIC IP WILL GET FUCKED
+
 
 ## Dependencies
 - [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) 
@@ -126,6 +128,10 @@ Press the small recessed button on the camera for about 15s until the lights sta
 ### Crop mode
 Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
 We'd run the program like `image-harvester crop`
+
+- [ ] Onlys send different medi
+- [ ] Fix for more than 1 cam cropping didn't seem to work
+- [ ] Add zones, if people in zone we handle them (this can be done with cropping and disabling specific cameras)
 
 - [ ] Just file to pussh calibration files
 - [ ] Fix crash when connection error (flower offline or incorrect page)

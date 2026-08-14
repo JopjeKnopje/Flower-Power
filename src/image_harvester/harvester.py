@@ -22,6 +22,7 @@ type Vec4f = tuple[float, float, float, float]
 
 @dataclass
 class CropSettings:
+    for_source: str = ""
     start_x: int = 0
     start_y: int = 0
     end_x: int = 0
@@ -36,6 +37,7 @@ class CropSettings:
         path = Path(Settings.CROP_SAVE_DIR).glob("*.*.*.*")
         for f in path:
             data = cls.decode(f.read_bytes())
+            data.for_source = f.name
             logger.info(f"loaded crop file {f} with data {data}")
             lst.append(data)
         logger.info(lst)
@@ -98,6 +100,7 @@ class JointViewport:
             img = self.read_stream(i)
             if self._crop_settings:
                 crop = self._crop_settings[i]
+                logger.info(f"applying crop {crop} to videostream {self._video_streams[i]._video_src.uri}" )
                 _, original_width, _ = img.shape  # pyright: ignore[reportAny]
 
                 if original_width > self._crop_max_width:
@@ -172,7 +175,6 @@ class Harvester:
 
     def __init__(self, config: FlowerConfig) -> None:
         self._config: FlowerConfig = config
-
         self._viewport: JointViewport = JointViewport(
             init_streams_from_cams(self._config.cameras, self._config.recording_dir),
             CropSettings.load_all(),
@@ -182,14 +184,16 @@ class Harvester:
         else:
             logger.info("viewport created")
 
+
         # Load the YOLO26 model
-        model_path = "yolo26n.pt"
+        model_path = "yolo26m.pt"
         self._model: YOLO = YOLO(model_path)
         logger.info(f"done loading model {model_path}")
 
+
     def loop(
         self,
-        processor: FrameProcessorType,
+        processor: FrameProcessorType | None = None,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:
@@ -201,22 +205,24 @@ class Harvester:
             except Exception as e:
                 logger.error(f"_viewport.read failed {e}")
                 continue
-            result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
+            result = self._model.predict(  # pyright: ignore[reportUnknownMemberType]
                 frame,
                 verbose=self._config.yolo_verbose,
-                persist=False,
+                # persist=False,
                 # Detect only humans
                 classes=[0],
                 device=yolo_device,
             )[0]
 
             # Get the boxes and track IDs
-            if result.boxes and result.boxes.is_track:
+            if result.boxes:
                 boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
                 boxes = typing.cast(list[Vec4f], boxes)
-                processor.process(frame, boxes)
+                if processor:
+                    processor.process(frame, boxes)
             else:
-                processor.skipped()
+                if processor:
+                    processor.skipped()
 
             # Display the annotated frame
             if not headless:

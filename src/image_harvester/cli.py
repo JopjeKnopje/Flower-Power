@@ -10,6 +10,7 @@ from image_harvester.flower_config import FlowerConfig
 from image_harvester.harvester import Harvester
 from image_harvester.logs import logger_init
 from image_harvester.processor import PeopleCounter
+from image_harvester.processor import CloseProcessor
 
 cli = App()
 
@@ -50,8 +51,10 @@ def run() -> None:
 
     api = Flower(config.flower_endpoint)
 
-    # proc = Processor(api)
+    # TODO Pass this algo at runtime
+    # proc = CloseProcessor(api)
     proc = PeopleCounter(api)
+    # proc = None
 
     is_headless = host_is_headless()
     yolo_device = "cuda"

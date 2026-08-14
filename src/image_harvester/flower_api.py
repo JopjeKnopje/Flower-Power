@@ -1,10 +1,15 @@
 from dataclasses import dataclass
 from enum import StrEnum
+import logging
 
 
 import httpx
 from httpx import Response
 import msgspec
+
+from image_harvester.logs import logger_init
+
+logger = logger_init()
 
 
 @dataclass
@@ -45,8 +50,8 @@ class Flower:
     def count(self, value: int) -> Status:
         content = self._http_get(self._Endpoints.cnt, {"n": str(value)}).content
         return self._decode(content)
-
     def main_mode(self, enable: bool) -> Status:
+
         if enable:
             args = "on"
         else:
@@ -55,8 +60,9 @@ class Flower:
         return self._decode(content)
 
     def people(self, value: int) -> Status:
+        _ = self.main_mode(True)
         content = self._http_get(self._Endpoints.people, {"n": str(value)}).content
-        print(content)
+        logger.info(f"response {content.decode()}")
         return self._decode(content)
 
     def move(self, pos: int) -> Status:
