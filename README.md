@@ -127,6 +127,7 @@ Press the small recessed button on the camera for about 15s until the lights sta
 Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
 We'd run the program like `image-harvester crop`
 
+- [ ] Fix cropping didn't seem to work
 - [ ] Just file to pussh calibration files
 - [ ] Fix crash when connection error (flower offline or incorrect page)
 - [ ] Fix fonts

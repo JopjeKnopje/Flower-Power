@@ -22,6 +22,7 @@ type Vec4f = tuple[float, float, float, float]
 
 @dataclass
 class CropSettings:
+    for_source: str = ""
     start_x: int = 0
     start_y: int = 0
     end_x: int = 0
@@ -36,6 +37,7 @@ class CropSettings:
         path = Path(Settings.CROP_SAVE_DIR).glob("*.*.*.*")
         for f in path:
             data = cls.decode(f.read_bytes())
+            data.for_source = f.name
             logger.info(f"loaded crop file {f} with data {data}")
             lst.append(data)
         logger.info(lst)
@@ -98,6 +100,7 @@ class JointViewport:
             img = self.read_stream(i)
             if self._crop_settings:
                 crop = self._crop_settings[i]
+                logger.info(f"applying crop {crop} to videostream {self._video_streams[i]._video_src.uri}" )
                 _, original_width, _ = img.shape  # pyright: ignore[reportAny]
 
                 if original_width > self._crop_max_width:
@@ -189,7 +192,7 @@ class Harvester:
 
     def loop(
         self,
-        processor: FrameProcessorType,
+        processor: FrameProcessorType | None = None,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:
@@ -214,9 +217,11 @@ class Harvester:
             if result.boxes and result.boxes.is_track:
                 boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
                 boxes = typing.cast(list[Vec4f], boxes)
-                processor.process(frame, boxes)
+                if processor:
+                    processor.process(frame, boxes)
             else:
-                processor.skipped()
+                if processor:
+                    processor.skipped()
 
             # Display the annotated frame
             if not headless:
