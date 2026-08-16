@@ -175,7 +175,6 @@ class Harvester:
 
     def __init__(self, config: FlowerConfig) -> None:
         self._config: FlowerConfig = config
-
         self._viewport: JointViewport = JointViewport(
             init_streams_from_cams(self._config.cameras, self._config.recording_dir),
             CropSettings.load_all(),
@@ -185,10 +184,12 @@ class Harvester:
         else:
             logger.info("viewport created")
 
+
         # Load the YOLO26 model
-        model_path = "yolo26n.pt"
+        model_path = "yolo26m.pt"
         self._model: YOLO = YOLO(model_path)
         logger.info(f"done loading model {model_path}")
+
 
     def loop(
         self,
@@ -204,17 +205,17 @@ class Harvester:
             except Exception as e:
                 logger.error(f"_viewport.read failed {e}")
                 continue
-            result = self._model.track(  # pyright: ignore[reportUnknownMemberType]
+            result = self._model.predict(  # pyright: ignore[reportUnknownMemberType]
                 frame,
                 verbose=self._config.yolo_verbose,
-                persist=False,
+                # persist=False,
                 # Detect only humans
                 classes=[0],
                 device=yolo_device,
             )[0]
 
             # Get the boxes and track IDs
-            if result.boxes and result.boxes.is_track:
+            if result.boxes:
                 boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
                 boxes = typing.cast(list[Vec4f], boxes)
                 if processor:
