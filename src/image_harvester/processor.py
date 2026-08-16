@@ -1,4 +1,5 @@
 from collections import deque
+import statistics
 
 import cv2
 from cv2.typing import MatLike
@@ -80,7 +81,10 @@ class CloseProcessor:
 
 
 class PeopleCounter:
-    _REQUEST_INTERVAL_MS: int = 1000
+    _REQUEST_INTERVAL_MS: int = 5000
+    _DEQUE_SIZE: int = 3
+
+    _old_values: deque[int] = deque(maxlen=_DEQUE_SIZE)
 
     def __init__(self, api: Flower) -> None:
         self._api: Flower = api
@@ -88,18 +92,32 @@ class PeopleCounter:
 
     def skipped(self) -> None:
         ...
-        # logger.warning("skipped processing, no one detected")
+
+    def _get_average(self) -> int | None:
+        lst = list(self._old_values)
+        if len(lst) > 0:
+            logger.info("")
+            return int(statistics.mean(lst) + 0.5)
+        return None
 
     # TODO: Run async of threaded?
     def update_flower(self, pos: int) -> None:
+
         self._timer.start_if_not_running()
+        avg_val = self._get_average()
+
+
+        logger.info(f"added new value to sample list {pos}")
+
         if self._timer.delta() > self._REQUEST_INTERVAL_MS:
             try:
-                logger.info(f"sending people count {pos}")
-                _ = self._api.people(pos)
+                if avg_val is not None:
+                    logger.info(f"sending people count {avg_val}")
+                    _ = self._api.people(avg_val)
             except httpx.ConnectError as e:
                 logger.exception(e)
 
+            self._old_values.append(pos)
             self._timer.start()
 
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:

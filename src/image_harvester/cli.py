@@ -52,8 +52,8 @@ def run() -> None:
     api = Flower(config.flower_endpoint)
 
     # TODO Pass this algo at runtime
-    proc = CloseProcessor(api)
-    # proc = PeopleCounter(api)
+    # proc = CloseProcessor(api)
+    proc = PeopleCounter(api)
     # proc = None
 
     is_headless = host_is_headless()
