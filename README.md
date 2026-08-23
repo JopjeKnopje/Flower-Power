@@ -51,6 +51,10 @@ The cameras we're using are [AXIS P3364-VE](https://www.axis.com/dam/public/ee/0
 For the actual computer we've used RPI4, this is a [repo](https://github.com/JopjeKnopje/rpi-qemu) I've used to test some configuration stuff in QEMU. 
 
 
+### Physical wiring
+
+![wiring](docs/flower-wiring.png)
+
 ### Camera Addressing
 The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with a number representing the last digits of their IP address.
 
