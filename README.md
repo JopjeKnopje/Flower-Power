@@ -1,10 +1,11 @@
 # Flower-Power
-This repo contains packages and tooling for the Flower Power project, currently this setup is supposed to run on a linux based laptop.
+This repo contains packages and tooling for the Flower Power project, we can currently this on a Linux based laptop or a Raspberry PI.
 
 
 Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of humans it detects. And output that value to the hydraulic controller using HTTP requests.
 
-NOTE: TO RUN ON YOUR LAPTOP DIRSABLE DSNMASSQ AND NETWORKMANAGER OTHERWISE YOUR STATIC IP WILL GET FUCKED
+Mock Controller: A fake flower representation made by [@area42](https://github.com/area42) handy for development
+
 
 
 ## Dependencies
@@ -43,9 +44,11 @@ The PI wont have internet access, you can SSH into it with user `joppe` and pass
 
 
 ## Hardware
-We are using a PoE Switch to power the cameras, the cameras don't actually have internet access.
+We are using a PoE Switch to power the cameras, the cameras don't actually have internet access with because they are running in a different subnet.
 
 The cameras we're using are [AXIS P3364-VE](https://www.axis.com/dam/public/ee/0b/43/axis-p3364-ve--user-manual-en-US-113863.pdf) security cameras (without their creepy housing).
+
+For the actual computer we've used RPI4, this is a [repo](https://github.com/JopjeKnopje/rpi-qemu) I've used to test some configuration stuff in QEMU. 
 
 
 ### Camera Addressing
@@ -57,16 +60,21 @@ It's all in the `192.168.0.0/24` range, these addresses are static.
 We connect to this network using a laptop, also configured with a static address.
 We can bridge the laptop to a mobile hotspot or wifi network if we want proper internet connectivity.
 
-RPI: 192.168.0.135
-CAM-1: 192.168.0.1
-CAM-2: 192.168.0.2
-CAM-3: 192.168.0.3
-CAM-4: 192.168.0.4
-FLOWER_ENDPOINT: 192.168.0.42
+> [!NOTE]
+> Keep in mind that [`network-manager`](https://wiki.archlinux.org/title/NetworkManager) might try to "reclaim" your network interface after you've assigned a static ip to it. You can fix this by disabling it.
+
+|Device|Addr|
+|-|-|
+|RPI   | 192.168.0.135 |
+|CAM-1 | 192.168.0.1 |
+|CAM-2 | 192.168.0.2 |
+|CAM-3 | 192.168.0.3 |
+|CAM-4 | 192.168.0.4 |
+|FLOWER_ENDPOINT | 192.168.0.42 |
 
 ## Configure WAN less setup
 
-Add a static ip to our interface so we can access the "flower network"
+Add a static ip to our interface so we can access the Flower subnet
 
 ### Laptop configuration
 ```bash
@@ -84,18 +92,6 @@ sudo ip route add 192.168.0.0/24 dev enp0s31f6
 sudo ip a add 192.168.0.10/24 dev enp42s0
 ```
 
-### Using DHCP server to reach the PI in-case of static ip issues
-```bash
-sysctl net.ipv4.ip_unprivileged_port_start=67
-apt install dns masq
-```
-
-in its config `/etc/dnsmasq.conf` set `port=0` to disable its DNS shit
-
-Monitor its logs with
-```bash
-journalctl --follow -u dnsmasq
-```
 ## Troubleshooting
 ### Check if running cuda
 
@@ -112,7 +108,21 @@ You can run it with.
 uv run ping-test
 ```
 
+### Using DHCP server to reach the PI in-case of static ip issues
+```bash
+sysctl net.ipv4.ip_unprivileged_port_start=67
+apt install dns masq
+```
+
+in its config `/etc/dnsmasq.conf` set `port=0` to disable its DNS functionality.
+
+Monitor its logs with
+```bash
+journalctl --follow -u dnsmasq
+```
+
 ### Bad camera focus
+You can usually get around this by playing around with the zoom in the webUI, the focus will adjust automatically with it.
 
 
 ### Resetting the camera
@@ -125,21 +135,17 @@ Press the small recessed button on the camera for about 15s until the lights sta
 
 
 ## Todo V2
-### Crop mode
-Select which camera frame we wanna modify and set a horizontal crop line for that using a UI.
-We'd run the program like `image-harvester crop`
 
-- [ ] Onlys send different medi
+- [ ] Fix cropping not working with more than 1 camera.
 - [ ] Fix for more than 1 cam cropping didn't seem to work
 - [ ] Add zones, if people in zone we handle them (this can be done with cropping and disabling specific cameras)
 
-- [ ] Just file to pussh calibration files
+- [ ] Just file to push calibration files to PI
 - [ ] Fix crash when connection error (flower offline or incorrect page)
 - [ ] Fix fonts
 - [ ] The cropper should be `VideoSource` agnostic, it currently only works for `VideoSourceRTP`.
 - [ ] Crop images to remove sky, join images together to optimize space.
 - [ ] Don't die when camara disconnects
-- [ ] Use predict instead of track
 - [ ] Use optimized model format for PI / edge devices
 - [ ] Stream/log datapoints
 - [ ] Remote video feed
