@@ -24,7 +24,7 @@ uv sync --all-packages
 
 3. Before running the image-harvester make sure that your machine can reach the cameras, see [reaching the cameras](#reaching-the-cameras).
 
-4. Optionally you can setup cropping for the camera feeds by running.
+4. Optionally you can setup crop the camera feeds running.
 ```bash
 uv run image-harvester crop
 ```
@@ -45,39 +45,15 @@ We are using a PoE Switch to power the cameras, the cameras don't actually have 
 
 The cameras we're using are [AXIS P3364-VE](https://www.axis.com/dam/public/ee/0b/43/axis-p3364-ve--user-manual-en-US-113863.pdf) security cameras (without their creepy housing).
 
-### Camera addressing
-The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with their number representing the last digits of their IP address.
 
-### Reaching the cameras
-In order to reach the camaras we have to tell our machine that, you can do this by _adding_ a static IP address to your network interface.
-Which will also add a route to your routing table. (`ip route`)
+### Camera Addressing
+The camera's are running on `192.168.0.X/24`, and are marked (see [photo](docs/cameras.jpg)) with a number representing the last digits of their IP address.
 
-You can add the address to your network interface with.
-```bash
-# sudo ip addr add 192.168.0.20/24 dev <dev>
-# in my case:
-sudo ip addr add 192.168.0.20/24 dev enp42s0
-```
+If you cannot reach the camera with their assigned address check if they're running on `192.168.0.90` which is their default address.
 
-You should now be able to reach the camera (and any other devices on that network)
-
-
-
-
-TODO: CLEAN UP DOWCX AHHAHAHHA
-
-
-# Addressing
-
-If you cannot reach the camera check fi they're running on `192.168.0.90` which is their default address.
-
-
-Its all in the `192.168.0.0/24` range, these addresses are static.
+It's all in the `192.168.0.0/24` range, these addresses are static.
 We connect to this network using a laptop, also configured with a static address.
-We can connect our laptop to a mobile hotspot or wifi network if we wan't connectivity.
-
-In case we need network access to the RPI, we could setup a route to the laptop which will have a masqurade rule?
-
+We can bridge the laptop to a mobile hotspot or wifi network if we want proper internet connectivity.
 
 RPI: 192.168.0.135
 CAM-1: 192.168.0.1
@@ -139,9 +115,10 @@ uv run ping-test
 
 ### Resetting the camera
 Checkout the manual
-TBA pressing the actual button
+Press the small recessed button on the camera for about 15s until the lights start flickering, you should then be able to reach it at `192.168.0.90`.
 
-Set the password to `admin`
+1. Set the powerline frequency to 50Hz
+2. Set the password to `admin`
 
 
 
