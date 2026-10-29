@@ -9,7 +9,7 @@ Mock Controller: A fake flower representation made by [@area42](https://github.c
 
 
 ## Dependencies
-- [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) 
+- [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods)
 - [prek](https://prek.j178.dev/installation/) (dev)
 - [ruff](https://docs.astral.sh/ruff/editors/setup/) (dev)
 - [basedpyright](https://github.com/DetachHead/basedpyright) (dev)
