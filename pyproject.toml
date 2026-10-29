@@ -20,6 +20,7 @@ dependencies = [
     "lap>=0.5.12",
     "httpx>=0.28.1",
     "cyclopts>=4.22.5",
+    "litestar[standard]>=2.25.0",
 ]
 
 
@@ -29,7 +30,7 @@ dev = [
 ]
 
 [project.scripts]
-image-harvester = "image_harvester:cli"
+image-harvester = "image_harvester:runner"
 plotter = "image_harvester:plotter"
 ping-test = "image_harvester:ping"
 formula = "image_harvester:formula"
