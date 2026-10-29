@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-# TODO: Add automagically called printing function post init
+# TODO: Parse this out from
 class Settings(ABC):
     _debug: bool = True
     server_host: str = "0.0.0.0"

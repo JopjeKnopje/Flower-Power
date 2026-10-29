@@ -36,5 +36,5 @@ def print_config(settings: Settings) -> None:
             print(f"{key} : {val}")
 
 
-config = load_settings()
-print_config(config)
+settings = load_settings()
+print_config(settings)
