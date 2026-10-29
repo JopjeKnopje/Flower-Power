@@ -1,20 +1,24 @@
-import time
-
-from image_harvester.queue import get_queue
+from image_harvester.processor import TestProcessor
 from image_harvester.server.server import FlowerServer
-from image_harvester.settings import config
+from image_harvester.settings import settings
+from processor.flower_config import FlowerConfig
+from processor.harvester import Harvester
 
 
 def app() -> None:
-    server = FlowerServer(host=config.server_host, port=config.server_port)
+    server = FlowerServer(host=settings.server_host, port=settings.server_port)
+
+    config = FlowerConfig.read()
+    print(config)
+    harvester = Harvester(config)
 
     with server.run_in_thread():
         print("Server is started.")
-        value = 0
-        while True:
-            print("123")
-            time.sleep(1)
-            value += 1
-            get_queue().put(value)
 
+        proc = TestProcessor()
+        print("harvesting looping...")
+
+        harvester.loop(proc)
+
+        print("harvesting done")
         # TODO: Pass generated data to queue.

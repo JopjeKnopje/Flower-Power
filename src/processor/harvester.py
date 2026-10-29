@@ -203,7 +203,8 @@ class Harvester:
         while self._viewport.is_open():
             try:
                 frame = self._viewport.read()
-            except Exception as e:
+            # TODO: Make exception more specific
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"_viewport.read failed {e}")
                 continue
             result = self._model.predict(  # pyright: ignore[reportUnknownMemberType]
