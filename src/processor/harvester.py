@@ -1,19 +1,19 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Literal, Protocol, Self
-import typing
 
-from image_harvester.settings import Settings
-from cv2.typing import MatLike, Point
+import typing
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Literal, Protocol, Self
+
 import cv2
 import msgspec
+from cv2.typing import MatLike, Point
 from ultralytics import YOLO
-from pathlib import Path
 
-
-from image_harvester.flower_config import Camera, FlowerConfig
-from image_harvester.logs import logger_init
-from image_harvester.video import VideoSource, VideoStream
+from processor.flower_config import Camera, FlowerConfig
+from processor.logs import logger_init
+from processor.settings import Settings
+from processor.video import VideoSource, VideoStream
 
 logger = logger_init()
 
@@ -193,6 +193,7 @@ class Harvester:
 
     def loop(
         self,
+        # TODO: Remove the optional here,
         processor: FrameProcessorType | None = None,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",

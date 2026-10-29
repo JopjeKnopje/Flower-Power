@@ -4,14 +4,16 @@ import sys
 from litestar import Litestar
 from torch.cuda import is_available as cuda_is_avaliable
 
-from image_harvester.cropper import Cropper
-from image_harvester.flower_api import Flower
-from image_harvester.flower_config import FlowerConfig
-from image_harvester.harvester import Harvester
-from image_harvester.logs import logger_init
-from image_harvester.processor import PeopleCounter
+from cyclopts import App
 
-# cli = App()
+from processor.cropper import Cropper
+from processor.flower_api import Flower
+from processor.flower_config import FlowerConfig
+from processor.harvester import Harvester
+from processor.logs import logger_init
+from processor.processor import PeopleCounter
+
+cli = App()
 
 logger = logger_init()
 

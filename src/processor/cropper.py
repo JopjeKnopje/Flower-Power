@@ -5,15 +5,14 @@ from typing import Any, override
 import cv2
 from cv2.typing import MatLike, Point
 
-
-from image_harvester.flower_config import Camera
-from image_harvester.harvester import (
+from processor.flower_config import Camera
+from processor.harvester import (
     CropSettings,
     JointViewport,
     init_streams_from_cams,
 )
-from image_harvester.logs import logger_init
-from image_harvester.settings import Settings
+from processor.logs import logger_init
+from processor.settings import Settings
 
 logger = logger_init()
 

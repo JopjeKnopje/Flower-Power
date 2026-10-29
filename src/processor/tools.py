@@ -2,8 +2,8 @@ import subprocess
 from ipaddress import IPv4Address
 from typing import Callable
 
-from image_harvester.flower_config import FlowerConfig
-from image_harvester.logs import logger_init
+from processor.flower_config import FlowerConfig
+from processor.logs import logger_init
 
 logger = logger_init()
 
