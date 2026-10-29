@@ -100,7 +100,9 @@ class JointViewport:
             img = self.read_stream(i)
             if self._crop_settings:
                 crop = self._crop_settings[i]
-                logger.info(f"applying crop {crop} to videostream {self._video_streams[i]._video_src.uri}" )
+                logger.info(
+                    f"applying crop {crop} to videostream {self._video_streams[i]._video_src.uri}"
+                )
                 _, original_width, _ = img.shape  # pyright: ignore[reportAny]
 
                 if original_width > self._crop_max_width:
@@ -184,12 +186,10 @@ class Harvester:
         else:
             logger.info("viewport created")
 
-
         # Load the YOLO26 model
         model_path = "yolo26m.pt"
         self._model: YOLO = YOLO(model_path)
         logger.info(f"done loading model {model_path}")
-
 
     def loop(
         self,

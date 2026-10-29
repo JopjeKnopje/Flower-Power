@@ -1,7 +1,7 @@
 import platform
 import sys
 
-from cyclopts import App
+from litestar import Litestar
 from torch.cuda import is_available as cuda_is_avaliable
 
 from image_harvester.cropper import Cropper
@@ -10,9 +10,8 @@ from image_harvester.flower_config import FlowerConfig
 from image_harvester.harvester import Harvester
 from image_harvester.logs import logger_init
 from image_harvester.processor import PeopleCounter
-from image_harvester.processor import CloseProcessor
 
-cli = App()
+# cli = App()
 
 logger = logger_init()
 
@@ -38,9 +37,13 @@ def crop() -> None:
     crop.loop()
 
 
+class RootController:
+    pass
+
+
 # TODO: Add gui override
 @cli.default
-def run() -> None:
+def run() -> Litestar:
     """
     Run the flower code
     """
@@ -62,6 +65,9 @@ def run() -> None:
         yolo_device = "cpu"
 
     harvester.loop(proc, yolo_device=yolo_device, headless=is_headless)
+
+    serv = Litestar(route_handlers=[RootController])
+    return serv
 
     # if len(proc._data_raw) != 0:
     #     with open("office_people.raw", "wb") as f:
