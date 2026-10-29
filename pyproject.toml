@@ -30,7 +30,7 @@ dev = [
 ]
 
 [project.scripts]
-image-harvester = "image_harvester:runner"
+image-harvester = "image_harvester:app"
 plotter = "image_harvester:plotter"
 ping-test = "image_harvester:ping"
 formula = "image_harvester:formula"

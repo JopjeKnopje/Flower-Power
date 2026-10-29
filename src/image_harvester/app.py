@@ -1,29 +1,35 @@
 import time
 from contextlib import contextmanager
+from queue import LifoQueue
 from threading import Thread
 
 import uvicorn
 from litestar import Litestar
+from litestar.di import Provide
 from litestar.openapi.config import OpenAPIConfig
 
 from image_harvester.controllers import RootController
 from image_harvester.settings import config
 from image_harvester.version import __version__
 
+data_queue: LifoQueue[int] = LifoQueue()
 
-def app() -> Litestar:
+
+def get_queue() -> LifoQueue[int]:
+    return data_queue
+
+
+def webserver() -> Litestar:
     openapi_config = OpenAPIConfig(
         version=__version__, title="FlowerPower ImageHarvester API"
     )
 
     app = Litestar(
+        dependencies={"get_queue": Provide(get_queue)},
         route_handlers=[RootController],
         debug=config.debug,
         openapi_config=openapi_config,
     )
-
-    # current_loop = asyncio.get_running_loop()
-    # _ = current_loop.create_task(query_router(3))
 
     return app
 
@@ -45,14 +51,19 @@ class Server(uvicorn.Server):
             thread.join()
 
 
-def runner() -> None:
-    config = uvicorn.Config(app=app, host="127.0.0.1", port=5000, log_level="info")
+def app() -> None:
+    config = uvicorn.Config(
+        app=webserver, host="127.0.0.1", port=5000, log_level="info"
+    )
     server = Server(config=config)
 
     with server.run_in_thread():
         print("Server is started.")
+        value = 0
         while True:
             print("123")
             time.sleep(1)
+            value += 1
+            get_queue().put(value)
 
-        print("Server exited.")
+        # TODO: Pass generated data to queue.
