@@ -90,8 +90,7 @@ class PeopleCounter:
         self._api: Flower = api
         self._timer: Timer = Timer()
 
-    def skipped(self) -> None:
-        ...
+    def skipped(self) -> None: ...
 
     def _get_average(self) -> int | None:
         lst = list(self._old_values)
@@ -105,7 +104,6 @@ class PeopleCounter:
 
         self._timer.start_if_not_running()
         avg_val = self._get_average()
-
 
         logger.info(f"added new value to sample list {pos}")
 
