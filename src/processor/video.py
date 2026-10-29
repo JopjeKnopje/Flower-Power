@@ -1,20 +1,17 @@
 from __future__ import annotations
 
-from threading import Lock
 import logging
+import time
 from dataclasses import dataclass
 from ipaddress import IPv4Address
 from pathlib import Path
 from queue import Empty, Queue
-from threading import Thread
-import time
-from typing import Callable
+from threading import Lock, Thread
 
 import cv2
 from cv2.typing import MatLike
-
-from image_harvester.flower_config import Camera
-from image_harvester.logs import logger_init
+from processor.flower_config import Camera
+from processor.logs import logger_init
 
 URIType = str | int
 

@@ -2,7 +2,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-from image_harvester.smoothing import sma
+from processor.smoothing import sma
 
 
 def plotter() -> None:

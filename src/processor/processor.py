@@ -1,17 +1,17 @@
-from collections import deque
 import statistics
+from collections import deque
 
 import cv2
-from cv2.typing import MatLike
 import httpx
+from cv2.typing import MatLike
 
-from image_harvester.flower_api import Flower
+from processor.flower_api import Flower
 
 # TODO: Use timeit timer instead?
-from image_harvester.harvester import Vec4f
-from image_harvester.logs import logger_init
-from image_harvester.smoothing import sma
-from image_harvester.timer import Timer
+from processor.harvester import Vec4f
+from processor.logs import logger_init
+from processor.smoothing import sma
+from processor.timer import Timer
 
 logger = logger_init()
 

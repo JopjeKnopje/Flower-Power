@@ -1,12 +1,10 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
-
 import httpx
-from httpx import Response
 import msgspec
-
-from image_harvester.logs import logger_init
+from httpx import Response
+from processor.logs import logger_init
 
 logger = logger_init()
 
