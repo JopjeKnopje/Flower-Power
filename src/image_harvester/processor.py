@@ -15,7 +15,7 @@ class TestProcessor(Processor):
     @override
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
         with self._mutex:
-            self._data = TestModel(len(boxes_n))
+            self._data = TestModel(value=len(boxes_n))
 
     @override
     def get_model(self) -> TestModel:
