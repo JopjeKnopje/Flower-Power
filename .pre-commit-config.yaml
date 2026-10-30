@@ -1,4 +1,4 @@
-exclude: "(^tests/|^mock_controller/|^controller/)"
+exclude: "(^tests/|src/mock_controller/.*|^controller/)"
 repos:
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
