@@ -1,22 +1,32 @@
 import statistics
+from abc import ABC
 from collections import deque
+from typing import override
 
 import cv2
 import httpx
 from cv2.typing import MatLike
 
+from core.models.models import BaseModel
 from processor.flower_api import Flower
 
 # TODO: Use timeit timer instead?
-from processor.harvester import Vec4f
 from processor.logs import logger_init
+from processor.settings import Vec4f
 from processor.smoothing import sma
 from processor.timer import Timer
 
 logger = logger_init()
 
 
-class CloseProcessor:
+class Processor(ABC):
+    # TODO: All of the derrived classes will be static.
+    def skipped(self) -> None: ...
+    def process(self, _frame: MatLike, _boxes_n: list[Vec4f]) -> None: ...
+    def get_model(self) -> BaseModel: ...
+
+
+class CloseProcessor(Processor):
     _REQUEST_INTERVAL_MS: int = 1000
     _DEQUE_SIZE: int = 1
 
@@ -29,10 +39,6 @@ class CloseProcessor:
         self._data_raw_ringbuf: deque[float] = deque(maxlen=self._DEQUE_SIZE)
         self._timer: Timer = Timer()
 
-    def skipped(self) -> None:
-        # logger.warning("skipped processing, no one detected")
-        ...
-
     # TODO: Run async of threaded?
     def update_flower(self, pos: int) -> None:
         self._timer.start_if_not_running()
@@ -44,6 +50,7 @@ class CloseProcessor:
 
             self._timer.start()
 
+    @override
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
         height, width, _ = frame.shape  # pyright: ignore[reportAny]
         value: float = 0
@@ -80,17 +87,14 @@ class CloseProcessor:
             raise Exception("_points.maxlen not set, cannot perform sma")
 
 
-class PeopleCounter:
+class PeopleCounter(Processor):
     _REQUEST_INTERVAL_MS: int = 5000
     _DEQUE_SIZE: int = 3
 
-    _old_values: deque[int] = deque(maxlen=_DEQUE_SIZE)
-
     def __init__(self, api: Flower) -> None:
+        self._old_values: deque[int] = deque(maxlen=self._DEQUE_SIZE)
         self._api: Flower = api
         self._timer: Timer = Timer()
-
-    def skipped(self) -> None: ...
 
     def _get_average(self) -> int | None:
         lst = list(self._old_values)
@@ -118,6 +122,7 @@ class PeopleCounter:
             self._old_values.append(pos)
             self._timer.start()
 
+    @override
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
         _ = frame
         # TODO: Maybe we do some smoothing here?

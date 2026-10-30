@@ -12,12 +12,11 @@ from ultralytics import YOLO
 
 from processor.flower_config import Camera, FlowerConfig
 from processor.logs import logger_init
-from processor.settings import Settings
+from processor.processor import Processor
+from processor.settings import Settings, Vec4f
 from processor.video import VideoSource, VideoStream
 
 logger = logger_init()
-
-type Vec4f = tuple[float, float, float, float]
 
 
 @dataclass
@@ -88,8 +87,7 @@ class JointViewport:
 
         for c in self._crop_settings:
             h = c.end_x - c.start_x
-            if h > max_width:
-                max_width = h
+            max_width = max(max_width, h)
         return max_width
 
     # TODO: Find best fitting resize for algo
@@ -101,7 +99,7 @@ class JointViewport:
             if self._crop_settings:
                 crop = self._crop_settings[i]
                 logger.info(
-                    f"applying crop {crop} to videostream {self._video_streams[i]._video_src.uri}"
+                    f"applying crop {crop} to videostream {self._video_streams[i].get_identifier()}"
                 )
                 _, original_width, _ = img.shape  # pyright: ignore[reportAny]
 
@@ -194,7 +192,7 @@ class Harvester:
     def loop(
         self,
         # TODO: Remove the optional here,
-        processor: FrameProcessorType | None = None,
+        processor: Processor,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:

@@ -7,9 +7,11 @@ from ipaddress import IPv4Address
 from pathlib import Path
 from queue import Empty, Queue
 from threading import Lock, Thread
+from typing import Callable
 
 import cv2
 from cv2.typing import MatLike
+
 from processor.flower_config import Camera
 from processor.logs import logger_init
 
@@ -84,9 +86,9 @@ class VideoStream:
     _q: Queue[MatLike]
     _out_path: Path | None
     _render_thread_handle: Thread
+    _render_stop_mutex: Lock
     _writer: cv2.VideoWriter | None = None
     _videosource_is_video: bool = False
-    _render_stop_mutex: Lock = Lock()
     _should_render__shared: bool = True
 
     def __init__(self, uri: VideoSource, out_path: Path | None = None) -> None:
@@ -94,6 +96,7 @@ class VideoStream:
         self._out_path = out_path
         self._cap = cv2.VideoCapture(self._video_src.uri)
         self._q = Queue()
+        self._render_stop_mutex = Lock()
         self._log("initializing ...")
 
         if isinstance(uri, VideoSourceLocalPath):
