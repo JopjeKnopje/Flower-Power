@@ -1,10 +1,9 @@
 import platform
 import sys
 
+from cyclopts import App
 from litestar import Litestar
 from torch.cuda import is_available as cuda_is_avaliable
-
-from cyclopts import App
 
 from processor.cropper import Cropper
 from processor.flower_api import Flower

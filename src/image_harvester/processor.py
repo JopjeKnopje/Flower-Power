@@ -1,22 +1,23 @@
-from abc import ABC
-from queue import LifoQueue
+from threading import Lock
+from typing import override
 
-from cv2.typing import MatLike, Vec4f
+from cv2.typing import MatLike
+
+from core.models.models import TestModel
+from processor.processor import Processor
+from processor.settings import Vec4f
 
 
-class FrameProcessor(ABC):
-    def skipped(self) -> None: ...
-    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None: ...
+class TestProcessor(Processor):
+    _mutex: Lock = Lock()
+    _data: TestModel
 
-
-# TODO: Inherit
-class TestProcessor:
-    _data_queue: LifoQueue[int] = LifoQueue()
-
-    def skipped(self) -> None: ...
+    @override
     def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
-        self._data_queue.put(len(boxes_n))
+        with self._mutex:
+            self._data = TestModel(len(boxes_n))
 
-    @classmethod
-    def get_queue(cls) -> LifoQueue[int]:
-        return cls._data_queue
+    @override
+    def get_model(self) -> TestModel:
+        with self._mutex:
+            return self._data
