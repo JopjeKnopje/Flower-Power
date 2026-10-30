@@ -1,6 +1,6 @@
 import subprocess
+from collections.abc import Callable
 from ipaddress import IPv4Address
-from typing import Callable
 
 from processor.flower_config import FlowerConfig
 from processor.logs import logger_init
@@ -31,7 +31,7 @@ def _log_bytes(data: bytes, logging_func: Callable[[str], None]) -> None:
         logging_func(line)
 
 
-def ping() -> None:
+def main() -> None:
     config = FlowerConfig.read()
     commands = _get_commmands(config)
 

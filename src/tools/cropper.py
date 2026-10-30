@@ -5,7 +5,8 @@ from typing import Any, override
 import cv2
 from cv2.typing import MatLike, Point
 
-from processor.flower_config import Camera
+from processor.cli import host_is_headless
+from processor.flower_config import Camera, FlowerConfig
 from processor.harvester import (
     CropSettings,
     JointViewport,
@@ -176,3 +177,18 @@ class Cropper:
 
         self._viewport.release()
         cv2.destroyAllWindows()
+
+
+def main() -> None:
+    """
+    Open a UI in which you can crop camera feeds and save them into a JSON file.
+    """
+
+    if host_is_headless():
+        raise RuntimeError("cannot open gui on headless device")
+
+    config = FlowerConfig.read()
+    print(config)
+
+    crop = Cropper(config.cameras)
+    crop.loop()

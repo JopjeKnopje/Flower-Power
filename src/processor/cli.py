@@ -5,7 +5,6 @@ from cyclopts import App
 from litestar import Litestar
 from torch.cuda import is_available as cuda_is_avaliable
 
-from processor.cropper import Cropper
 from processor.flower_api import Flower
 from processor.flower_config import FlowerConfig
 from processor.harvester import Harvester
@@ -20,22 +19,6 @@ logger = logger_init()
 def host_is_headless() -> bool:
     # check if we're running on the RPI
     return sys.platform == "linux" and platform.machine() == "aarch64"
-
-
-@cli.command
-def crop() -> None:
-    """
-    Open a UI in which you can crop camera feeds and save them into a JSON file.
-    """
-
-    if host_is_headless():
-        raise RuntimeError("cannot open gui on headless device")
-
-    config = FlowerConfig.read()
-    print(config)
-
-    crop = Cropper(config.cameras)
-    crop.loop()
 
 
 class RootController:
