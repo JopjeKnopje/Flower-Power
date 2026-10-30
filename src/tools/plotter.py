@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from processor.smoothing import sma
 
 
-def plotter() -> None:
+def main() -> None:
 
     data_raw: list[int]
     with open("office_people.raw", "rb") as f:
@@ -20,7 +20,7 @@ def plotter() -> None:
     _ = plt.plot(data_raw, color="black")  # pyright: ignore[reportUnknownMemberType]
     _ = plt.plot(data_sma, color="red")  # pyright: ignore[reportUnknownMemberType]
     _ = plt.plot(data_sma_2, color="blue")  # pyright: ignore[reportUnknownMemberType]
-    # _ = plt.plot(ema_data, color="red")  # pyright: ignore[reportUnknownMemberType]
-    # _ = plt.plot(sma_data, color="blue")  # pyright: ignore[reportUnknownMemberType]
+    # _ = plt.plot(ema_data, color="red")
+    # _ = plt.plot(sma_data, color="blue")
     _ = plt.ylabel("values")  # pyright: ignore[reportUnknownMemberType]
     _ = plt.show()  # pyright: ignore[reportUnknownMemberType]
