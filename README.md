@@ -1,11 +1,20 @@
 # Flower-Power
-This repo contains packages and tooling for the Flower Power project, we can currently this on a Linux based laptop or a Raspberry PI.
+This repo contains packages and tooling for the Flower Power project, we can currently run this on a Linux based laptop or a Raspberry PI 4.
 
+## Module Overview
 
-Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, this will count the amount of humans it detects. And output that value to the hydraulic controller using HTTP requests.
+Processor: Defines how to Flower should behave based on input data, this data is provided by the Image Harvester.
+
+Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, whichs draws boxes around the humans it detects. Those boxes are available to the Processor through a HTTP server.
+
+Core: This package contains the `FlowerAPI` and the `ImageHarvesterAPI`, it also has the `BoxesModel` which is used by the Processor and the ImageHarvester.
+
+Tools: various tools for debugging, mainly the `ping` tool.
 
 Mock Controller: A fake flower representation made by [@area42](https://github.com/area42) handy for development
 
+
+### Commands
 
 
 ## Dependencies
@@ -29,13 +38,14 @@ uv sync --all-packages
 
 4. Optionally you can setup crop the camera feeds running.
 ```bash
-uv run image-harvester crop
+uv run image-harvester
 ```
 
 5. Run the image-harvester, it should automatically connect to the cameras.
 ```bash
-uv run image-harvester
+uv run cropper
 ```
+
 ## Cloning onto the PI
 The PI wont have internet access, you can SSH into it with user `joppe` and passwd `123zegikniet`. We will ofc change this after the event hehe.
 
