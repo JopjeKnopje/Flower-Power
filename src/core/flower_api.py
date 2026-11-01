@@ -18,7 +18,7 @@ class Status:
     target_mm: float | None = None
 
 
-class Flower:
+class FlowerAPI:
     type Endpoint = Literal["/people", "/main", "/status", "/move", "/stop", "/cnt"]
 
     def __init__(self, host: str) -> None:
