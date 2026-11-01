@@ -5,7 +5,7 @@ import httpx
 import msgspec
 from httpx import Response
 
-from processor.logs import logger_init
+from core.logs import logger_init
 
 logger = logger_init()
 

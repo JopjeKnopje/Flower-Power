@@ -5,15 +5,16 @@ from typing import Any, override
 import cv2
 from cv2.typing import MatLike, Point
 
+from core.logs import logger_init
 from processor.cli import host_is_headless
-from processor.flower_config import Camera, FlowerConfig
-from processor.harvester import (
+
+from .flower_config import Camera, FlowerConfig
+from .harvester import (
     CropSettings,
     JointViewport,
     init_streams_from_cams,
 )
-from processor.logs import logger_init
-from processor.settings import Settings
+from .settings import settings
 
 logger = logger_init()
 
@@ -110,15 +111,15 @@ class Cropper:
         return cur_stream_id
 
     @staticmethod
-    def save(file_name: Path, settings: CropSettings) -> None:
+    def save(file_name: Path, crop_settings: CropSettings) -> None:
         """
         Save current CropSelector to JSON file, it will overwrite the file if it already exists.
         """
 
-        path = Settings.CROP_SAVE_DIR.joinpath(file_name)
+        path = settings.CROP_SAVE_DIR.joinpath(file_name)
         path.parents[0].mkdir(exist_ok=True)
-        _ = path.write_bytes(settings.encode())
-        logger.info(f"wrote crop settings to file {path.as_posix()} {settings}")
+        _ = path.write_bytes(crop_settings.encode())
+        logger.info(f"wrote crop settings to file {path.as_posix()} {crop_settings}")
 
     @staticmethod
     def _put_text(frame: MatLike, text: str, p: Point, font_size: float = 1.0) -> None:
