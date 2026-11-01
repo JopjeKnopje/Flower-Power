@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Protocol, Self
@@ -11,13 +12,26 @@ from cv2.typing import MatLike, Point
 from ultralytics import YOLO
 
 from core.logs import logger_init
-from core.models.models import Vec4f
-from image_harvester.flower_config import Camera, FlowerConfig
-from image_harvester.settings import settings
-from processor.processor import Processor
+from core.models.models import BoxesModel, Vec4f
 from processor.video import VideoSource, VideoStream
 
+from .flower_config import Camera, FlowerConfig
+from .settings import settings
+
 logger = logger_init()
+
+
+class Accumulator:
+    _data: deque[BoxesModel]
+
+    def __init__(self) -> None:
+        self._data = deque(maxlen=16)
+
+    def add(self, boxes: list[Vec4f] | None) -> None:
+        self._data.append(BoxesModel(box=boxes))
+
+    def get(self) -> deque[BoxesModel]:
+        return self._data
 
 
 @dataclass
@@ -193,8 +207,7 @@ class Harvester:
 
     def loop(
         self,
-        # TODO: Remove the optional here,
-        processor: Processor,
+        accumulator: Accumulator,
         headless: bool = False,
         yolo_device: Literal["cpu", "cuda"] = "cuda",
     ) -> None:
@@ -220,11 +233,9 @@ class Harvester:
             if result.boxes:
                 boxes = result.boxes.xywhn.cpu().tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportAttributeAccessIssue]
                 boxes = typing.cast(list[Vec4f], boxes)
-                if processor:
-                    processor.process(frame, boxes)
+                accumulator.add(boxes)
             else:
-                if processor:
-                    processor.skipped()
+                accumulator.add(None)
 
             # Display the annotated frame
             if not headless:
