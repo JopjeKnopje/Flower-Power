@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import StrEnum
+from typing import Literal
 
 import httpx
 import msgspec
@@ -19,22 +19,16 @@ class Status:
 
 
 class Flower:
-    class _Endpoints(StrEnum):
-        people = "/people"
-        main = "/main"
-        status = "/status"
-        move = "/move"
-        stop = "/stop"
-        cnt = "/cnt"
+    type Endpoint = Literal["/people", "/main", "/status", "/move", "/stop", "/cnt"]
 
-    def __init__(self, endpoint: str) -> None:
+    def __init__(self, host: str) -> None:
         # TODO: Error handle the endpoint not containing http?
-        self._endpoint: str = endpoint
+        self._host: str = host
 
     def _http_get(
-        self, path: str, params: dict[str, str] | str | None = None
+        self, endpoint: Endpoint, params: dict[str, str] | str | None = None
     ) -> Response:
-        resp = httpx.get(f"{self._endpoint}{path}", params=params).raise_for_status()
+        resp = httpx.get(f"{self._host}{endpoint}", params=params).raise_for_status()
         return resp
 
     @staticmethod
@@ -42,11 +36,11 @@ class Flower:
         return msgspec.json.decode(content, type=Status, strict=False)
 
     def status(self) -> Status:
-        content = self._http_get(self._Endpoints.status).content
+        content = self._http_get("/status").content
         return self._decode(content)
 
     def count(self, value: int) -> Status:
-        content = self._http_get(self._Endpoints.cnt, {"n": str(value)}).content
+        content = self._http_get("/cnt", {"n": str(value)}).content
         return self._decode(content)
 
     def main_mode(self, enable: bool) -> Status:
@@ -55,19 +49,19 @@ class Flower:
             args = "on"
         else:
             args = "off"
-        content = self._http_get(self._Endpoints.main, args).content
+        content = self._http_get("/main", args).content
         return self._decode(content)
 
     def people(self, value: int) -> Status:
         _ = self.main_mode(True)
-        content = self._http_get(self._Endpoints.people, {"n": str(value)}).content
+        content = self._http_get("/people", {"n": str(value)}).content
         logger.info(f"response {content.decode()}")
         return self._decode(content)
 
     def move(self, pos: int) -> Status:
-        content = self._http_get(self._Endpoints.move, {"band": str(pos)}).content
+        content = self._http_get("/move", {"band": str(pos)}).content
         return self._decode(content)
 
     def stop(self) -> Status:
-        content = self._http_get(self._Endpoints.stop).content
+        content = self._http_get("/stop").content
         return self._decode(content)
