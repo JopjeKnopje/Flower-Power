@@ -180,7 +180,7 @@ class Cropper:
         cv2.destroyAllWindows()
 
 
-def main() -> None:
+def cropper() -> None:
     """
     Open a UI in which you can crop camera feeds and save them into a JSON file.
     """

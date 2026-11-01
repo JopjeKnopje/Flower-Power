@@ -31,8 +31,8 @@ dev = [
 
 [project.scripts]
 image-harvester = "image_harvester:app"
+cropper = "image_harvester:cropper"
 processor = "processor:app"
-cropper = "tools:cropper"
 formula = "tools:formula"
 ping = "tools:ping"
 plotter = "tools:plotter"
