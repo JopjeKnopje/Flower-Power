@@ -2,12 +2,12 @@ import platform
 import sys
 
 from litestar.di import Provide
+from torch.cuda import is_available as cuda_is_available
 
 from core.logs import logger_init
-from processor.processor import TestProcessor
 
 from .flower_config import FlowerConfig
-from .harvester import Harvester
+from .harvester import Accumulator, Harvester
 from .server.server import FlowerServer
 from .settings import settings
 
@@ -23,24 +23,23 @@ def app() -> None:
     config = FlowerConfig.read()
     harvester = Harvester(config)
 
-    proc = TestProcessor()
+    acc = Accumulator()
 
-    processor_dependencies = {"test_model": Provide(proc.get_model)}
-
+    processor_dependencies = {"accumulator": Provide(acc.get)}
     server = FlowerServer(
         host=settings.server_host,
         port=settings.server_port,
         server_dependencies=processor_dependencies,
     )
 
+    logger.info("Server is started.")
     with server.run_in_thread():
-        print("Server is started.")
+        logger.info("harvesting looping...")
 
-        # api = Flower("http:123")
-        # proc = PeopleCounter(api)
-        print("harvesting looping...")
-
-        harvester.loop(proc)
-
+        is_headless = host_is_headless()
+        yolo_device = "cuda"
+        if is_headless or not cuda_is_available():
+            yolo_device = "cpu"
+        # TODO: inject windowing functions
+        harvester.loop(acc, headless=is_headless, yolo_device=yolo_device)
         print("harvesting done")
-        # TODO: Pass generated data to queue.
