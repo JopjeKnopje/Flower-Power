@@ -49,7 +49,7 @@ class CropSettings:
         lst: list[Self] = []
 
         # match all files which are IPV4 address, later we should implement this cropping for a buncha diff video feeds too
-        path = Path(settings.CROP_SAVE_DIR).glob("*.*.*.*")
+        path = Path(settings.crop_save_dir).glob("*.*.*.*")
         for f in path:
             data = cls.decode(f.read_bytes())
             data.for_source = f.name
