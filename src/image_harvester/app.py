@@ -1,10 +1,22 @@
+import platform
+import sys
+
 from litestar.di import Provide
 
-from image_harvester.processor import TestProcessor
-from image_harvester.server.server import FlowerServer
-from image_harvester.settings import settings
-from processor.flower_config import FlowerConfig
-from processor.harvester import Harvester
+from core.logs import logger_init
+from processor.processor import TestProcessor
+
+from .flower_config import FlowerConfig
+from .harvester import Harvester
+from .server.server import FlowerServer
+from .settings import settings
+
+logger = logger_init()
+
+
+def host_is_headless() -> bool:
+    # check if we're running on the RPI
+    return sys.platform == "linux" and platform.machine() == "aarch64"
 
 
 def app() -> None:

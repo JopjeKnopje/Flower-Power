@@ -2,7 +2,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-from processor.smoothing import sma
+from core.smoothing import sma
 
 
 def main() -> None:

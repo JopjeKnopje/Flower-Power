@@ -10,16 +10,18 @@ import msgspec
 from cv2.typing import MatLike, Point
 from ultralytics import YOLO
 
-from processor.flower_config import Camera, FlowerConfig
-from processor.logs import logger_init
+from core.logs import logger_init
+from core.models.models import Vec4f
+from image_harvester.flower_config import Camera, FlowerConfig
+from image_harvester.settings import settings
 from processor.processor import Processor
-from processor.settings import Settings, Vec4f
 from processor.video import VideoSource, VideoStream
 
 logger = logger_init()
 
 
 @dataclass
+# TODO: use vec2d instead of start/end
 class CropSettings:
     for_source: str = ""
     start_x: int = 0
@@ -33,7 +35,7 @@ class CropSettings:
         lst: list[Self] = []
 
         # match all files which are IPV4 address, later we should implement this cropping for a buncha diff video feeds too
-        path = Path(Settings.CROP_SAVE_DIR).glob("*.*.*.*")
+        path = Path(settings.CROP_SAVE_DIR).glob("*.*.*.*")
         for f in path:
             data = cls.decode(f.read_bytes())
             data.for_source = f.name

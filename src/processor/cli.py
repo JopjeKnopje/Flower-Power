@@ -5,10 +5,10 @@ from cyclopts import App
 from litestar import Litestar
 from torch.cuda import is_available as cuda_is_avaliable
 
-from processor.flower_api import Flower
-from processor.flower_config import FlowerConfig
-from processor.harvester import Harvester
-from processor.logs import logger_init
+from core.flower_api import Flower
+from core.logs import logger_init
+from image_harvester.flower_config import FlowerConfig
+from image_harvester.harvester import Harvester
 from processor.processor import PeopleCounter
 
 cli = App()
