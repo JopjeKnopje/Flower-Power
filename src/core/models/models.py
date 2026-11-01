@@ -20,15 +20,6 @@ class BaseModel(ABC):
 
 
 @dataclass
-class TestModel(BaseModel):
-    """
-    Model for the TestProcessor
-    """
-
-    value: int = 12
-
-
-@dataclass
 class BoxesModel(BaseModel):
     """
     The Harvester can detect multiple Boxes per frame, a box is simply a 4 point vector.
