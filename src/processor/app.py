@@ -1,6 +1,6 @@
 import time
 
-from core.flower_api import Flower
+from core.flower_api import FlowerAPI
 from core.image_harvester_api import ImageHarvesterAPI
 from core.logs import logger_init
 from core.models.models import BoxesModel
@@ -26,8 +26,8 @@ def app() -> None:
     print(config)
 
     harvester_api = ImageHarvesterAPI("http://127.0.0.1:5000")
-    flower = Flower(config.flower_endpoint)
-    proc = PeopleCounter(flower)
+    flower_api = FlowerAPI(config.flower_endpoint)
+    proc = PeopleCounter(flower_api)
 
     while True:
         boxes = harvester_api.get_boxes()[0]

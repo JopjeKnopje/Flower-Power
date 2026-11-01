@@ -6,7 +6,7 @@ from typing import override
 import httpx
 
 # TODO: Use timeit timer instead?
-from core.flower_api import Flower
+from core.flower_api import FlowerAPI
 from core.logs import logger_init
 from core.models.models import Vec4f
 from core.smoothing import sma
@@ -26,8 +26,8 @@ class CloseProcessor(Processor):
     _REQUEST_INTERVAL_MS: int = 1000
     _DEQUE_SIZE: int = 1
 
-    def __init__(self, api: Flower) -> None:
-        self._api: Flower = api
+    def __init__(self, api: FlowerAPI) -> None:
+        self._api: FlowerAPI = api
 
         self._sma_output_list: list[float] = []
 
@@ -88,9 +88,9 @@ class PeopleCounter(Processor):
     _REQUEST_INTERVAL_MS: int = 5000
     _DEQUE_SIZE: int = 3
 
-    def __init__(self, api: Flower) -> None:
+    def __init__(self, api: FlowerAPI) -> None:
         self._old_values: deque[int] = deque(maxlen=self._DEQUE_SIZE)
-        self._api: Flower = api
+        self._api: FlowerAPI = api
         self._timer: Timer = Timer()
 
     def _get_average(self) -> int | None:
