@@ -3,15 +3,15 @@ This repo contains packages and tooling for the Flower Power project, we can cur
 
 ## Module Overview
 
-Processor: Defines how to Flower should behave based on input data, this data is provided by the Image Harvester.
+- Processor: defines how to Flower should behave based on input data, this data is provided by the Image Harvester.
 
-Image Harvester: Runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, whichs draws boxes around the humans it detects. Those boxes are available to the Processor through a HTTP server.
+- Image Harvester: runs a [YOLO](https://docs.ultralytics.com/models/yolo26#overview) model, whichs draws boxes around the humans it detects. Those boxes are available to the Processor through a HTTP server.
 
-Core: This package contains the `FlowerAPI` and the `ImageHarvesterAPI`, it also has the `BoxesModel` which is used by the Processor and the ImageHarvester.
+- Core: this package contains the `FlowerAPI` and the `ImageHarvesterAPI`, it also has the `BoxesModel` which is used by the Processor and the ImageHarvester.
 
-Tools: various tools for debugging, mainly the `ping` tool.
+- Tools: various tools for debugging, mainly the `ping` tool.
 
-Mock Controller: A fake flower representation made by [@area42](https://github.com/area42) handy for development
+- Mock Controller: a fake flower representation made by [@area42](https://github.com/area42) handy for development
 
 
 ### Commands
