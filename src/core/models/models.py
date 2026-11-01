@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-zone = ZoneInfo("Europe/Amsterdam")
 type Vec4f = tuple[float, float, float, float]
 
 
@@ -13,7 +12,11 @@ class BaseModel(ABC):
     Base model for all flower data
     """
 
-    timestamp: float = field(default_factory=lambda: datetime.now(tz=zone).timestamp())
+    timestamp: float = field(
+        default_factory=lambda: datetime.now(
+            tz=ZoneInfo("Europe/Amsterdam")
+        ).timestamp()
+    )
 
 
 @dataclass
@@ -22,29 +25,14 @@ class TestModel(BaseModel):
     Model for the TestProcessor
     """
 
-    value: int = 0
-
-
-@dataclass
-class Box:
-    y_start: int
-    y_end: int
-    x_start: int
-    x_end: int
-
-    @property
-    def width(self) -> int:
-        return abs(self.x_end - self.x_start)
-
-    @property
-    def heigth(self) -> int:
-        return abs(self.y_end - self.y_start)
+    value: int = 12
 
 
 @dataclass
 class BoxesModel(BaseModel):
     """
-    Model for the TestProcessor
+    The Harvester can detect multiple Boxes per frame, a box is simply a 4 point vector.
+    We can also have an empty frame, which we represent as None.
     """
 
-    # boxes: list[Box]
+    box: list[Vec4f] | None = None

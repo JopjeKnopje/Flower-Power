@@ -7,9 +7,10 @@ from litestar import Litestar
 from litestar.openapi.config import OpenAPIConfig
 from litestar.types import Dependencies
 
-from image_harvester.server.controllers import RootController
-from image_harvester.settings import settings
-from image_harvester.version import __version__
+from core.version import __version__
+
+from ..settings import settings
+from .controllers import RootController
 
 
 # Kinda dirty but we need to somehow inject the `model_cbs` into our litestar instance
