@@ -1,4 +1,3 @@
-from .cli import cli
+from .app import app
 
-# export our functions
-__all__ = ["cli"]
+__all__ = ["app"]
