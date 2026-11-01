@@ -5,11 +5,11 @@ from litestar.di import Provide
 from torch.cuda import is_available as cuda_is_available
 
 from core.logs import logger_init
+from image_harvester.settings import settings
 
 from .flower_config import FlowerConfig
 from .harvester import Accumulator, Harvester
 from .server.server import FlowerServer
-from .settings import settings
 
 logger = logger_init()
 
