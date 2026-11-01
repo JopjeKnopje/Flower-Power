@@ -1,4 +1,5 @@
 from abc import ABC
+from pathlib import Path
 
 
 # TODO: Parse this out from
@@ -6,6 +7,7 @@ class Settings(ABC):
     _debug: bool = True
     server_host: str = "0.0.0.0"
     server_port: int = 5000
+    CROP_SAVE_DIR: Path = Path("crop-settings")
 
     @property
     def debug(self) -> bool:

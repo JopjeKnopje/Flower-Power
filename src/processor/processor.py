@@ -1,19 +1,18 @@
 import statistics
 from abc import ABC
 from collections import deque
+from threading import Lock
 from typing import override
 
 import cv2
 import httpx
 from cv2.typing import MatLike
 
-from core.models.models import BaseModel
-from processor.flower_api import Flower
-
 # TODO: Use timeit timer instead?
-from processor.logs import logger_init
-from processor.settings import Vec4f
-from processor.smoothing import sma
+from core.flower_api import Flower
+from core.logs import logger_init
+from core.models.models import BaseModel, TestModel, Vec4f
+from core.smoothing import sma
 from processor.timer import Timer
 
 logger = logger_init()
@@ -22,8 +21,24 @@ logger = logger_init()
 class Processor(ABC):
     # TODO: All of the derrived classes will be static.
     def skipped(self) -> None: ...
+    # TODO: get called as fast as possible, it should prob take a delta time.
     def process(self, _frame: MatLike, _boxes_n: list[Vec4f]) -> None: ...
     def get_model(self) -> BaseModel: ...
+
+
+class TestProcessor(Processor):
+    _mutex: Lock = Lock()
+    _data: TestModel
+
+    @override
+    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
+        with self._mutex:
+            self._data = TestModel(value=len(boxes_n))
+
+    @override
+    def get_model(self) -> TestModel:
+        with self._mutex:
+            return self._data
 
 
 class CloseProcessor(Processor):

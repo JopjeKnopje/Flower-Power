@@ -1,11 +1,13 @@
+import os
+import pathlib
 from dataclasses import dataclass
 from ipaddress import AddressValueError, IPv4Address
-import os
 from pathlib import Path
-import pathlib
 from typing import Self
+
 import msgspec
-from processor.logs import logger_init
+
+from core.logs import logger_init
 
 logger = logger_init()
 
