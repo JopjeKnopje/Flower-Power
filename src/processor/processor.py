@@ -1,17 +1,14 @@
 import statistics
 from abc import ABC
 from collections import deque
-from threading import Lock
 from typing import override
 
-import cv2
 import httpx
-from cv2.typing import MatLike
 
 # TODO: Use timeit timer instead?
 from core.flower_api import Flower
 from core.logs import logger_init
-from core.models.models import BaseModel, TestModel, Vec4f
+from core.models.models import Vec4f
 from core.smoothing import sma
 from processor.timer import Timer
 
@@ -22,23 +19,7 @@ class Processor(ABC):
     # TODO: All of the derrived classes will be static.
     def skipped(self) -> None: ...
     # TODO: get called as fast as possible, it should prob take a delta time.
-    def process(self, _frame: MatLike, _boxes_n: list[Vec4f]) -> None: ...
-    def get_model(self) -> BaseModel: ...
-
-
-class TestProcessor(Processor):
-    _mutex: Lock = Lock()
-    _data: TestModel
-
-    @override
-    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
-        with self._mutex:
-            self._data = TestModel(value=len(boxes_n))
-
-    @override
-    def get_model(self) -> TestModel:
-        with self._mutex:
-            return self._data
+    def process(self, boxes: list[Vec4f]) -> None: ...  # pyright: ignore[reportUnusedParameter]
 
 
 class CloseProcessor(Processor):
@@ -66,27 +47,28 @@ class CloseProcessor(Processor):
             self._timer.start()
 
     @override
-    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
-        height, width, _ = frame.shape  # pyright: ignore[reportAny]
+    def process(self, boxes: list[Vec4f]) -> None:
+        # TODO: Fix this formula for new format
         value: float = 0
-        for boxn in boxes_n:
-            x, y, w, h = boxn
-            x_pos = int((x - (w / 2)) * width)  # pyright: ignore[reportAny]
-            y_pos = int(y * height)  # pyright: ignore[reportAny]
-
-            _ = cv2.putText(
-                frame,
-                f"height {h:.2f}",
-                (x_pos, y_pos),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (20, 205, 20),
-                2,
-                cv2.LINE_AA,
-            )
-            # tracked_objects.append(int(object_height))
-            value += h
-        value = int((value / len(boxes_n)) * 10)
+        # height, width = 1000, 1000
+        # for boxn in boxes:
+        #     x, y, w, h = boxn
+        #     x_pos = int((x - (w / 2)) * width)
+        #     y_pos = int(y * height)
+        #
+        #     _ = cv2.putText(
+        #         frame,
+        #         f"height {h:.2f}",
+        #         (x_pos, y_pos),
+        #         cv2.FONT_HERSHEY_SIMPLEX,
+        #         1.0,
+        #         (20, 205, 20),
+        #         2,
+        #         cv2.LINE_AA,
+        #     )
+        #     tracked_objects.append(int(object_height))
+        #     value += h
+        value = int((value / len(boxes)) * 10)
         self._data_raw_ringbuf.append(value + 0.5)
         self._data_raw.append(value)
         if self._data_raw_ringbuf.maxlen is not None:
@@ -138,8 +120,7 @@ class PeopleCounter(Processor):
             self._timer.start()
 
     @override
-    def process(self, frame: MatLike, boxes_n: list[Vec4f]) -> None:
-        _ = frame
+    def process(self, boxes: list[Vec4f]) -> None:
         # TODO: Maybe we do some smoothing here?
         # just pass the info along to the flower
-        self.update_flower(len(boxes_n))
+        self.update_flower(len(boxes))

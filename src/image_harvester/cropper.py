@@ -6,7 +6,7 @@ import cv2
 from cv2.typing import MatLike, Point
 
 from core.logs import logger_init
-from processor.cli import host_is_headless
+from image_harvester.app import host_is_headless
 
 from .flower_config import Camera, FlowerConfig
 from .harvester import (
@@ -116,7 +116,7 @@ class Cropper:
         Save current CropSelector to JSON file, it will overwrite the file if it already exists.
         """
 
-        path = settings.CROP_SAVE_DIR.joinpath(file_name)
+        path = settings.crop_save_dir.joinpath(file_name)
         path.parents[0].mkdir(exist_ok=True)
         _ = path.write_bytes(crop_settings.encode())
         logger.info(f"wrote crop settings to file {path.as_posix()} {crop_settings}")
