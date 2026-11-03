@@ -1,13 +1,13 @@
-build:
+docker_build:
 	#!/bin/bash
 	docker build -t pojpe/image_harvester:latest -t pojpe/image_harvester:$(git rev-parse --short HEAD) . -f docker/Dockerfile
 
-push:
+docker_push:
 	#!/bin/bash
 	# docker image push pojpe/image_harvester:latest pojpe/image_harvester:$(git rev-parse --short HEAD)
 	docker image push pojpe/image_harvester:$(git rev-parse --short HEAD)
 
-run:
+docker_run:
 	#!/bin/bash
 	docker run pojpe/image_harvester:$(git rev-parse --short HEAD)
 

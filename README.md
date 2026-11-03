@@ -163,6 +163,26 @@ d push pojpe/image_harvester:latest
 ```
 
 
+### Setting up Flower machine (DELL OPTIPLEX)
+Install debian 12.2.0
+
+```bash
+su
+apt update
+apt install -y sudo vim git curl htop 
+
+# add user to sudoers group
+adduser joppe sudo
+# relog
+
+# install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+git clone https://github.com/JopjeKnopje/Flower-Power.git
+cd Flower-Power
+```
+
+
 
 ## Todo V2
 
