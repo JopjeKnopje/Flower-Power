@@ -148,6 +148,22 @@ Press the small recessed button on the camera for about 15s until the lights sta
 
 
 
+### Setting up dockerfile
+NOTE: None of these graphical libraries should be needed if we don't use CUDA.
+
+```bash
+#install libxcb
+apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev
+# install libgl
+apt-get install ffmpeg libsm6 libxext6  -y
+
+
+# push it to the registery
+d push pojpe/image_harvester:latest
+```
+
+
+
 ## Todo V2
 
 - [ ] Fix cropping not working with more than 1 camera.

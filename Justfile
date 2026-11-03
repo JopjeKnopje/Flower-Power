@@ -1,8 +1,8 @@
 build:
-	docker build -t image_harvester . -f docker/Dockerfile
+	docker build -t pojpe/image_harvester:latest . -f docker/Dockerfile
 
 run:
-	docker run image_harvester
+	docker run pojpe/image_harvester:latest
 
 push-rpi:
 	#!/bin/bash
