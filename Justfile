@@ -1,8 +1,15 @@
 build:
-	docker build -t pojpe/image_harvester:latest . -f docker/Dockerfile
+	#!/bin/bash
+	docker build -t pojpe/image_harvester:latest -t pojpe/image_harvester:$(git rev-parse --short HEAD) . -f docker/Dockerfile
+
+push:
+	#!/bin/bash
+	# docker image push pojpe/image_harvester:latest pojpe/image_harvester:$(git rev-parse --short HEAD)
+	docker image push pojpe/image_harvester:$(git rev-parse --short HEAD)
 
 run:
-	docker run pojpe/image_harvester:latest
+	#!/bin/bash
+	docker run pojpe/image_harvester:$(git rev-parse --short HEAD)
 
 push-rpi:
 	#!/bin/bash

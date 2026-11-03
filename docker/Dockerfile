@@ -33,9 +33,11 @@ COPY --from=builder --chown=root:root /app/pyproject.toml /app/
 ENV PYTHONPATH=/app/.venv/lib/python3.13/site-packages
 
 # TODO: Remove this hack
-# RUN apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev ffmpeg libsm6 libxext6 vim -y
+RUN apt update -y && apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev ffmpeg libsm6 libxext6 vim -y
+
 
 WORKDIR /app
+RUN touch README.md
 
 # use unbuffered output
 CMD ["uv", "run", "image-harvester"]
