@@ -1,3 +1,8 @@
+build:
+	docker build -t image_harvester . -f docker/Dockerfile
+
+run:
+	docker run image_harvester
 
 push-rpi:
 	#!/bin/bash
