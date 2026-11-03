@@ -25,13 +25,15 @@ def app() -> None:
     config = FlowerConfig.read()
     print(config)
 
-    harvester_api = ImageHarvesterAPI("http://127.0.0.1:5000")
+    harvester_api = ImageHarvesterAPI("http://192.168.0.135:5000")
     flower_api = FlowerAPI(config.flower_endpoint)
     proc = PeopleCounter(flower_api)
 
     while True:
-        boxes = harvester_api.get_boxes()[0]
-        loop(proc, boxes)
+        boxes = harvester_api.get_boxes()
+        if len(boxes) == 0:
+            continue
+        loop(proc, boxes[0])
         # TODO: Try and see if we can use websocket for this.
         print(boxes)
         time.sleep(0.5)
