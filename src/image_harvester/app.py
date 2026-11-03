@@ -41,5 +41,5 @@ def app() -> None:
         if is_headless or not cuda_is_available():
             yolo_device = "cpu"
         # TODO: inject windowing functions
-        harvester.loop(acc, headless=is_headless, yolo_device=yolo_device)
+        harvester.loop(acc, headless=True, yolo_device=yolo_device)
         print("harvesting done")
