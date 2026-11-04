@@ -35,5 +35,5 @@ def app() -> None:
             continue
         loop(proc, boxes[0])
         # TODO: Try and see if we can use websocket for this.
-        print(boxes)
+        # print(boxes)
         time.sleep(0.5)
