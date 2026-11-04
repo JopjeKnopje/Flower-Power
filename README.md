@@ -25,6 +25,7 @@ The image harvester has [image-harvester.toml](image-harvester.toml.example) fil
 | `IH_YOLO_DEV` | "cpu" / "cuda" | When GPU is installed|
 | `IH_YOLO_VERBOSE` | "true" / "false" | YOLO in verbose mode|
 | `IH_HEADLESS` | "true" / "false" | Will spawn preview window |
+| `IH_LITESTAR` | "true" / "false" | Enable/disable webserver|
 
 
 

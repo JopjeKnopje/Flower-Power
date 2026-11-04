@@ -15,6 +15,7 @@ class Settings(ABC):
     headless: bool = env_to_bool("IH_HEADLESS", True)
     yolo_verbose: bool = env_to_bool("IH_YOLO_VERBOSE", True)
     yolo_device: str = environ.get("IH_YOLO_DEV", "cpu")
+    run_litestar: bool = env_to_bool("IH_LITESTAR", True)
     crop_save_dir: Path = Path("crop-settings")
 
     @property

@@ -23,6 +23,7 @@ def app() -> None:
         server_dependencies=processor_dependencies,
     )
 
+    # TODO: Implement `run_litestar`
     logger.info("Server is started.")
     with server.run_in_thread():
         logger.info("harvesting looping...")
