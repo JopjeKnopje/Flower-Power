@@ -79,7 +79,8 @@ We can bridge the laptop to a mobile hotspot or wifi network if we want proper i
 
 |Device|Addr|
 |-|-|
-|RPI   | 192.168.0.135 |
+|FLOWER-MACHINE   | 192.168.0.135 |
+|FLOWER-MACHINE   | DHCP if available |
 |CAM-1 | 192.168.0.1 |
 |CAM-2 | 192.168.0.2 |
 |CAM-3 | 192.168.0.3 |
@@ -108,6 +109,10 @@ su
 apt update
 apt install -y sudo vim git curl htop 
 
+# install dependencies for the torch package.
+# NOTE: we should install the correct torch version which doesn't depend on graphical libs, since we're running headless
+apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev ffmpeg libsm6 libxext6  -y
+
 # add user to sudoers group
 adduser joppe sudo
 # relog
@@ -121,6 +126,7 @@ cd Flower-Power
 
 
 #### Configuring network
+
 
 https://wiki.debian.org/NetworkConfiguration#Configuring_the_network_on_Debian_systems
 
