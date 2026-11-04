@@ -4,7 +4,7 @@ import typing
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Protocol, Self
+from typing import Protocol, Self
 
 import cv2
 import msgspec
@@ -206,10 +206,7 @@ class Harvester:
         logger.info(f"done loading model {model_path}")
 
     def loop(
-        self,
-        accumulator: Accumulator,
-        headless: bool = False,
-        yolo_device: Literal["cpu", "cuda"] = "cuda",
+        self, accumulator: Accumulator, yolo_device: str, headless: bool = False
     ) -> None:
 
         logger.info(f"starting yolo loop on device {yolo_device}")

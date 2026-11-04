@@ -14,7 +14,16 @@ This repo contains packages and tooling for the Flower Power project, we can cur
 - Mock Controller: a fake flower representation made by [@area42](https://github.com/area42) handy for development
 
 
-### Commands
+## Configuration
+
+
+The image harvester has [image-harvester.toml](image-harvester.toml.example) file, and the following environment variables.
+
+| ENV_VAR | Default Value | Notes|
+| ------------- | -------------- |-|
+| `IH_ENVIRONMENT` | "dev" / "prod"| |
+| `IH_YOLO_DEV` | "cpu" / "cuda" | When GPU is installed|
+| `IH_HEADLESS` | "true" / "false" | Will spawn preview window |
 
 
 ## Dependencies

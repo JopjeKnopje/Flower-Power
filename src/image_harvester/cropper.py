@@ -6,7 +6,6 @@ import cv2
 from cv2.typing import MatLike, Point
 
 from core.logs import logger_init
-from image_harvester.app import host_is_headless
 
 from .flower_config import Camera, FlowerConfig
 from .harvester import (
@@ -184,9 +183,6 @@ def cropper() -> None:
     """
     Open a UI in which you can crop camera feeds and save them into a JSON file.
     """
-
-    if host_is_headless():
-        raise RuntimeError("cannot open gui on headless device")
 
     config = FlowerConfig.read()
     print(config)
