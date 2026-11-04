@@ -1,13 +1,7 @@
+FLOWER_MACHINE_IP := "192.168.0.135"
 
-push-rpi:
-	#!/bin/bash
+ssh:
+	ssh {{FLOWER_MACHINE_IP}}
 
-	files=$(git ls-files)
-	target_path=~/copy-test
-	target_ip=192.168.0.135
-
-	for f in $files
-	do
-		ssh ${target_ip} "mkdir -p ${target_path}/$(dirname $f)" -v
-		scp -r $f ${target_ip}:${target_path}/$f
-	done
+push:
+	rsync -aP image-harvester.toml pyproject.toml README.md crop-settings src --exclude '__pycache__/' {{FLOWER_MACHINE_IP}}:app/ -v

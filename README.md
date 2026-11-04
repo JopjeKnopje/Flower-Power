@@ -104,6 +104,8 @@ sudo ip route add 192.168.0.0/24 dev enp0s31f6
 ### Setting up Flower Machine (DELL OPTIPLEX)
 Install debian 12.2.0
 
+
+The following commands are ran on the Flower Machine.
 ```bash
 su
 apt update
@@ -111,17 +113,28 @@ apt install -y sudo vim git curl htop
 
 # install dependencies for the torch package.
 # NOTE: we should install the correct torch version which doesn't depend on graphical libs, since we're running headless
-apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev ffmpeg libsm6 libxext6  -y
+apt-get install libxcb-randr0-dev libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev ffmpeg libsm6 libxext6 rsync -y
 
 # add user to sudoers group
 adduser joppe sudo
 # relog
+```
 
+
+
+Install the image-harvester software
+```bash
 # install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-git clone https://github.com/JopjeKnopje/Flower-Power.git
-cd Flower-Power
+git clone https://github.com/JopjeKnopje/Flower-Power.git app
+cd app
+
+# download all the dependencies
+uv sync
+
+# run the image-harvester
+uv run image-harvester
 ```
 
 
