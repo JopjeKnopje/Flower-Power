@@ -206,7 +206,11 @@ class Harvester:
         logger.info(f"done loading model {model_path}")
 
     def loop(
-        self, accumulator: Accumulator, yolo_device: str, headless: bool = False
+        self,
+        accumulator: Accumulator,
+        yolo_device: str,
+        yolo_verbose: bool,
+        headless: bool,
     ) -> None:
 
         logger.info(f"starting yolo loop on device {yolo_device}")
@@ -219,7 +223,7 @@ class Harvester:
                 continue
             result = self._model.predict(  # pyright: ignore[reportUnknownMemberType]
                 frame,
-                verbose=self._config.yolo_verbose,
+                verbose=yolo_verbose,
                 # persist=False,
                 # Detect only humans
                 classes=[0],

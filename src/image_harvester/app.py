@@ -31,6 +31,7 @@ def app() -> None:
         harvester.loop(
             acc,
             yolo_device=settings.yolo_device,
+            yolo_verbose=settings.yolo_verbose,
             headless=settings.headless,
         )
         print("harvesting done")
