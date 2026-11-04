@@ -90,7 +90,7 @@ We can bridge the laptop to a mobile hotspot or wifi network if we want proper i
 
 Add a static ip to our interface so we can access the Flower subnet
 
-### Laptop configuration
+### dev machine configuration
 ```bash
 sudo ip link set enp0s31f6 down
 sudo ip a add 192.168.0.10/24 dev enp0s31f6
@@ -100,10 +100,50 @@ sudo ip route add 192.168.0.0/24 dev enp0s31f6
 ```
 
 
-### Desktop configuration
+### Setting up Flower Machine (DELL OPTIPLEX)
+Install debian 12.2.0
 
 ```bash
-sudo ip a add 192.168.0.10/24 dev enp42s0
+su
+apt update
+apt install -y sudo vim git curl htop 
+
+# add user to sudoers group
+adduser joppe sudo
+# relog
+
+# install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+git clone https://github.com/JopjeKnopje/Flower-Power.git
+cd Flower-Power
+```
+
+
+#### Configuring network
+
+https://wiki.debian.org/NetworkConfiguration#Configuring_the_network_on_Debian_systems
+
+> /etc/network/interfaces
+
+```txt
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s31f6
+iface enp0s31f6 inet dhcp
+
+iface enp0s31f6 inet static
+address 192.168.0.135
+netmask 255.255.255.0
+gateway 192.168.0.1
 ```
 
 ## Troubleshooting
@@ -160,26 +200,6 @@ apt-get install ffmpeg libsm6 libxext6  -y
 
 # push it to the registery
 d push pojpe/image_harvester:latest
-```
-
-
-### Setting up Flower machine (DELL OPTIPLEX)
-Install debian 12.2.0
-
-```bash
-su
-apt update
-apt install -y sudo vim git curl htop 
-
-# add user to sudoers group
-adduser joppe sudo
-# relog
-
-# install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-git clone https://github.com/JopjeKnopje/Flower-Power.git
-cd Flower-Power
 ```
 
 
