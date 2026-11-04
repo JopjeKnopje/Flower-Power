@@ -13,10 +13,10 @@ from ultralytics import YOLO
 
 from core.logs import logger_init
 from core.models.models import BoxesModel, Vec4f
-from processor.video import VideoSource, VideoStream
 
 from .flower_config import Camera, FlowerConfig
 from .settings import settings
+from .video import VideoSource, VideoStream
 
 logger = logger_init()
 

@@ -6,6 +6,10 @@ from core.models.models import BoxesModel
 
 
 class ImageHarvesterAPI:
+    """
+    The image harvester will detect humans and draw a box around them, you can use this API to fetch them.
+    """
+
     def __init__(self, host: str) -> None:
         self._host: str = host
 
