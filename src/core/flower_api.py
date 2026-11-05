@@ -19,14 +19,14 @@ class Status:
 
 
 class FlowerAPI:
-    type Endpoint = Literal["/people", "/main", "/status", "/move", "/stop", "/cnt"]
+    type _Endpoint = Literal["/people", "/main", "/status", "/move", "/stop", "/cnt"]
 
     def __init__(self, host: str) -> None:
         # TODO: Error handle the endpoint not containing http?
         self._host: str = host
 
     def _http_get(
-        self, endpoint: Endpoint, params: dict[str, str] | str | None = None
+        self, endpoint: _Endpoint, params: dict[str, str] | str | None = None
     ) -> Response:
         resp = httpx.get(f"{self._host}{endpoint}", params=params).raise_for_status()
         return resp
