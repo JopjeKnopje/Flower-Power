@@ -176,6 +176,10 @@ netmask 255.255.255.0
 gateway 192.168.0.1
 ```
 
+Reload the networking stuff
+```bash
+sudo systemctl restart networking
+```
 ## Troubleshooting
 ### Check if running cuda
 
