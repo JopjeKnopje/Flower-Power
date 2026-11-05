@@ -43,6 +43,13 @@ class FlowerAPI:
         content = self._http_get("/cnt", {"n": str(value)}).content
         return self._decode(content)
 
+    def fire(self, stamen_n: int | Literal["all"], duration_ms: int) -> Status:
+
+        # NOTE: Not tested
+        args = {"n": str(stamen_n), "ms": str(duration_ms)}
+        content = self._http_get("/main", args).content
+        return self._decode(content)
+
     def main_mode(self, enable: bool) -> Status:
 
         if enable:
