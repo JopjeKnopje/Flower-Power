@@ -33,4 +33,4 @@ class BoxesModel(BaseModel):
     We can also have an empty frame, which we represent as None.
     """
 
-    box: list[Vec4f] | None = None
+    boxes: list[Vec4f] | None = None

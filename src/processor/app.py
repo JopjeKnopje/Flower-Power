@@ -10,8 +10,8 @@ logger = logger_init()
 
 
 def loop(proc: Processor, boxes: BoxesModel) -> None:
-    if boxes.box:
-        proc.process(boxes.box)
+    if boxes.boxes:
+        proc.process(boxes.boxes)
     else:
         proc.skipped()
 
