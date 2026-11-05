@@ -42,7 +42,7 @@ def dec_hook(type: type[Path], obj: str) -> Path:
     raise TypeError("Type not supported by hook")
 
 
-# NOTE: Make this static?
+# NOTE: Make this static? and generic
 @dataclass
 class FlowerConfig:
     cameras: list[Camera]

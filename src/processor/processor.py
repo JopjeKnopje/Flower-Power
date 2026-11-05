@@ -10,7 +10,7 @@ from core.flower_api import FlowerAPI
 from core.logs import logger_init
 from core.models.models import Vec4f
 from core.smoothing import sma
-from processor.timer import Timer
+from core.timer import Timer
 
 logger = logger_init()
 

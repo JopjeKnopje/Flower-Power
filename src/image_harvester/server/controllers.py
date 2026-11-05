@@ -15,8 +15,9 @@ class RootController(Controller):
     @websocket_stream("/")
     async def hello(
         self, accumulator: NamedDependency[deque[BoxesModel]]
-    ) -> AsyncGenerator[deque[BoxesModel]]:
+    ) -> AsyncGenerator[BoxesModel]:
         # TODO: Only run this when new data is added to queue
         while True:
-            yield accumulator
+            model = accumulator.pop()
+            yield model
             await asyncio.sleep(0.5)

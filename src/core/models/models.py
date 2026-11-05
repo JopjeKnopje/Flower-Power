@@ -6,9 +6,25 @@ from zoneinfo import ZoneInfo
 
 import msgspec
 
+# TODO: Use a proper class for it, for better readablilty
 type Vec4f = tuple[float, float, float, float]
 
 
+# @dataclass
+# class Position:
+#     x: float
+#     y: float
+#
+# @dataclass
+# class Dimensions:
+#     width: float
+#     height: float
+#
+# @dataclass
+# class Box:
+#     pos: Position
+#     dimension: Dimensions
+#
 @dataclass
 class BaseModel(ABC):
     """
