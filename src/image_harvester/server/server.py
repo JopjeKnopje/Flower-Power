@@ -10,7 +10,7 @@ from litestar.types import Dependencies
 from core.version import __version__
 
 from ..settings import settings
-from .controllers import RootController
+from .controllers import BoxesController
 
 
 # Kinda dirty but we need to somehow inject the `model_cbs` into our litestar instance
@@ -50,7 +50,7 @@ class FlowerServer(uvicorn.Server):
 
         app = Litestar(
             dependencies=self._server_dependencies,
-            route_handlers=[RootController],
+            route_handlers=[BoxesController],
             debug=settings.debug,
             openapi_config=openapi_config,
         )

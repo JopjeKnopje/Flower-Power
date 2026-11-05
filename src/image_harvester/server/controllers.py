@@ -11,7 +11,7 @@ from litestar.di import NamedDependency
 from core.models.models import BoxesModel
 
 
-class RootController(Controller):
+class BoxesController(Controller):
     @websocket_stream("/")
     async def hello(
         self, accumulator: NamedDependency[deque[BoxesModel]]
