@@ -17,7 +17,7 @@ def app() -> None:
 
     acc = Accumulator()
 
-    processor_dependencies = {"accumulator": Provide(acc.get)}
+    processor_dependencies = {"accumulator": Provide(acc)}
     server = FlowerServer(
         host=settings.server_host,
         port=settings.server_port,
