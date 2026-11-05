@@ -1,15 +1,22 @@
+import asyncio
 from collections import deque
+from collections.abc import AsyncGenerator
 
-from litestar import Controller, websocket_listener
+from litestar import (
+    Controller,
+    websocket_stream,  # pyright: ignore[reportUnknownVariableType]
+)
 from litestar.di import NamedDependency
 
 from core.models.models import BoxesModel
 
 
 class RootController(Controller):
-    @websocket_listener("/")
-    def hello(
-        self, data: str, accumulator: NamedDependency[deque[BoxesModel]]
-    ) -> deque[BoxesModel]:
-        _ = data
-        return accumulator
+    @websocket_stream("/")
+    async def hello(
+        self, accumulator: NamedDependency[deque[BoxesModel]]
+    ) -> AsyncGenerator[deque[BoxesModel]]:
+        # TODO: Only run this when new data is added to queue
+        while True:
+            yield accumulator
+            await asyncio.sleep(0.5)

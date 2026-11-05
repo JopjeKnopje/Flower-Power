@@ -1,7 +1,6 @@
-import time
+from websockets.sync.client import connect
 
 from core.flower_api import FlowerAPI
-from core.image_harvester_api import ImageHarvesterAPI
 from core.logs import logger_init
 from core.models.models import BoxesModel
 from image_harvester.flower_config import FlowerConfig
@@ -25,15 +24,21 @@ def app() -> None:
     config = FlowerConfig.read()
     print(config)
 
-    harvester_api = ImageHarvesterAPI("http://192.168.0.135:5000")
+    # harvester_api = ImageHarvesterAPI("http://192.168.0.135:5000")
     flower_api = FlowerAPI(config.flower_endpoint)
-    proc = PeopleCounter(flower_api)
+    _ = PeopleCounter(flower_api)
 
-    while True:
-        boxes = harvester_api.get_boxes()
-        if len(boxes) == 0:
-            continue
-        loop(proc, boxes[0])
-        # TODO: Try and see if we can use websocket for this.
-        # print(boxes)
-        time.sleep(0.5)
+    with connect("ws://192.168.0.10:5000") as ws:
+        while True:
+            print("waiting for data")
+            data = ws.recv()
+            print(f"received {data}")
+
+    # while True:
+    #     boxes = harvester_api.get_boxes()
+    #     if len(boxes) == 0:
+    #         continue
+    #     loop(proc, boxes[0])
+    #     # TODO: Try and see if we can use websocket for this.
+    #     # print(boxes)
+    #     time.sleep(0.5)

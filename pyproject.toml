@@ -19,6 +19,7 @@ dependencies = [
     "httpx>=0.28.1",
     "cyclopts>=4.22.5",
     "litestar[standard]>=2.25.0",
+    "websockets>=17.3",
 ]
 
 
