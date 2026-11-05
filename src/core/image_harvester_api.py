@@ -11,7 +11,7 @@ class ImageHarvesterAPI:
     """
 
     def __init__(self, host: str) -> None:
-        self._host: str = host
+        self._host: str = f"http://{host}"
 
     def _http_get(self) -> Response:
         endpoint = "/"
