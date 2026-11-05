@@ -1,7 +1,10 @@
 from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Self
 from zoneinfo import ZoneInfo
+
+import msgspec
 
 type Vec4f = tuple[float, float, float, float]
 
@@ -17,6 +20,10 @@ class BaseModel(ABC):
             tz=ZoneInfo("Europe/Amsterdam")
         ).timestamp()
     )
+
+    @classmethod
+    def parse(cls, data: str) -> Self:
+        return msgspec.json.decode(data, type=cls)
 
 
 @dataclass
