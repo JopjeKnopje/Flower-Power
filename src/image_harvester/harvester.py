@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import typing
-from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol, Self
@@ -11,27 +10,15 @@ import msgspec
 from cv2.typing import MatLike, Point
 from ultralytics import YOLO
 
+from core.accumulator import Accumulator
 from core.logs import logger_init
-from core.models.models import BoxesModel, Vec4f
+from core.models.models import Vec4f
 
 from .flower_config import Camera, FlowerConfig
 from .settings import settings
 from .video import VideoSource, VideoStream
 
 logger = logger_init()
-
-
-class Accumulator:
-    _data: deque[BoxesModel]
-
-    def __init__(self) -> None:
-        self._data = deque(maxlen=16)
-
-    def add(self, boxes: list[Vec4f] | None) -> None:
-        self._data.append(BoxesModel(box=boxes))
-
-    def get(self) -> deque[BoxesModel]:
-        return self._data
 
 
 @dataclass

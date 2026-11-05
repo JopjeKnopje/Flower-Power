@@ -1,10 +1,11 @@
 from litestar.di import Provide
 
+from core.accumulator import Accumulator
 from core.logs import logger_init
 from image_harvester.settings import settings
 
 from .flower_config import FlowerConfig
-from .harvester import Accumulator, Harvester
+from .harvester import Harvester
 from .server.server import FlowerServer
 
 logger = logger_init()
