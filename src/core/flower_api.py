@@ -46,14 +46,24 @@ class FlowerAPI:
         return self._decode(content)
 
     def fire(self, stamen_n: int | Literal["all"], duration_ms: int = 200) -> Status:
+        """
+        spew fire from one or all of the stamen
 
-        # NOTE: Not tested
+        :stamen_n number of the stamen `0-4` or `"all"` to fire
+        :duration_ms duration of the fire
+        """
+
         args = {"n": str(stamen_n), "ms": str(duration_ms)}
         content = self._http_get("/fire", args).content
         return self._decode(content)
 
-    def main_mode(self, enable: bool) -> Status:
-        if enable:
+    def main_mode(self, state: bool) -> Status:
+        """
+        enable or disable main-mode on the flower
+
+        state: state
+        """
+        if state:
             args = "on"
         else:
             args = "off"
@@ -62,12 +72,24 @@ class FlowerAPI:
         return self._decode(content)
 
     def people(self, value: int) -> Status:
+        """
+        send the amount of detected people to the flower controller.
+        used in main-mode
+
+        value: amount of people
+        """
         _ = self.main_mode(True)
         content = self._http_get("/people", {"n": str(value)}).content
         logger.info(f"response {content.decode()}")
         return self._decode(content)
 
     def move(self, pos: int) -> Status:
+        """
+        move the flower petals into a position
+
+        :pos valid input `0-9`
+        """
+
         content = self._http_get("/move", {"band": str(pos)}).content
         return self._decode(content)
 
