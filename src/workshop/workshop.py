@@ -1,6 +1,4 @@
 from setup import camera
-from setup import flower
 
-x = camera.get_boxes()
-print(x)
-flower.move(5)
+print(f"people {camera.get_people_count()}")
+# time.sleep(1)

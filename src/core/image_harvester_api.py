@@ -22,6 +22,9 @@ class ImageHarvesterAPI:
         content = self._http_get().content
         return self._decode(content)
 
+    def get_people_count(self) -> int:
+        return len(self.get_boxes())
+
     @staticmethod
     def _decode(content: bytes) -> list[BoxesModel]:
         return msgspec.json.decode(content, type=list[BoxesModel], strict=False)

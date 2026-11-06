@@ -15,15 +15,17 @@ class Status:
     adc: int
     auto: bool
     stroke_mm: float
+    fire: list[int]
     target_mm: float | None = None
 
 
 class FlowerAPI:
-    type _Endpoint = Literal["/people", "/main", "/status", "/move", "/stop", "/cnt"]
+    # type _Endpoint = Literal["/people", "/main", "/status", "/move", "/stop", "/cnt"]
+    type _Endpoint = str
 
     def __init__(self, host: str) -> None:
         # TODO: Error handle the endpoint not containing http?
-        self._host: str = host
+        self._host: str = f"http://{host}"
 
     def _http_get(
         self, endpoint: _Endpoint, params: dict[str, str] | str | None = None
@@ -43,20 +45,20 @@ class FlowerAPI:
         content = self._http_get("/cnt", {"n": str(value)}).content
         return self._decode(content)
 
-    def fire(self, stamen_n: int | Literal["all"], duration_ms: int) -> Status:
+    def fire(self, stamen_n: int | Literal["all"], duration_ms: int = 200) -> Status:
 
         # NOTE: Not tested
         args = {"n": str(stamen_n), "ms": str(duration_ms)}
-        content = self._http_get("/main", args).content
+        content = self._http_get("/fire", args).content
         return self._decode(content)
 
     def main_mode(self, enable: bool) -> Status:
-
         if enable:
             args = "on"
         else:
             args = "off"
-        content = self._http_get("/main", args).content
+        # TODO: find other way to pass this along
+        content = self._http_get(f"/main?{args}").content
         return self._decode(content)
 
     def people(self, value: int) -> Status:
