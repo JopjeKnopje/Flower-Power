@@ -27,5 +27,5 @@ def app() -> None:
         proc.process(model.boxes)
 
     # TODO: Read from config
-    ws = ReceiverWS(cb=receive_cb, image_harvester_host="192.168.0.10:5000")
+    ws = ReceiverWS(cb=receive_cb, image_harvester_host="192.168.0.135:5000")
     ws.loop()

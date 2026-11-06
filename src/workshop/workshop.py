@@ -1,4 +1,7 @@
-from setup import camera
+from time import sleep
+from setup import flower
 
-print(f"people {camera.get_people_count()}")
-# time.sleep(1)
+
+for i in range(0, 4):
+    x = flower.fire(i, 500)
+    sleep(0.1)
