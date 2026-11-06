@@ -23,7 +23,10 @@ class ImageHarvesterAPI:
         return self._decode(content)
 
     def get_people_count(self) -> int:
-        return len(self.get_boxes())
+        boxes = self.get_boxes()[0].boxes
+        if boxes:
+            return len(boxes)
+        return 0
 
     @staticmethod
     def _decode(content: bytes) -> list[BoxesModel]:
