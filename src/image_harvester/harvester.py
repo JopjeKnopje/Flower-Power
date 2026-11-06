@@ -8,7 +8,7 @@ from typing import Protocol, Self
 import cv2
 import msgspec
 from cv2.typing import MatLike, Point
-from ultralytics import YOLO
+# from ultralytics import YOLO
 
 from core.accumulator import Accumulator
 from core.logs import logger_init
@@ -188,9 +188,9 @@ class Harvester:
             logger.info("viewport created")
 
         # Load the YOLO26 model
-        model_path = "yolo26m.pt"
-        self._model: YOLO = YOLO(model_path)
-        logger.info(f"done loading model {model_path}")
+        # model_path = "yolo26m.pt"
+        # self._model: YOLO = YOLO(model_path)
+        # logger.info(f"done loading model {model_path}")
 
     def loop(
         self,
