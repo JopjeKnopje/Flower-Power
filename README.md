@@ -19,12 +19,12 @@ This repo contains packages and tooling for the Flower Power project, we can cur
 
 The image harvester has [image-harvester.toml](image-harvester.toml.example) file, and the following environment variables.
 
-| ENV_VAR | Default Value | Notes|
-| ------------- | -------------- |-|
-| `IH_ENVIRONMENT` | "dev" / "prod"| |
-| `IH_HEADLESS` | "true" / "false" | Will spawn preview window |
-| `IH_YOLO_DEV` | "cpu" / "cuda" | When GPU is installed|
-| `IH_YOLO_VERBOSE` | "true" / "false" | YOLO in verbose mode|
+| ENV_VAR | Default | Options | Notes|
+| ------------- | -------------- |-| -|
+| `IH_ENVIRONMENT` | "dev" | "dev" / "prod"| |
+| `IH_HEADLESS` | "true" | "true" / "false" | Will spawn preview window |
+| `IH_YOLO_DEV` | "cpu" | "cpu" / "cuda" | When GPU is installed|
+| `IH_YOLO_VERBOSE` |"true" | "true" / "false" | YOLO in verbose mode|
 
 
 
@@ -92,11 +92,11 @@ We can bridge the laptop to a mobile hotspot or wifi network if we want proper i
 |-|-|
 |FLOWER-MACHINE   | 192.168.0.135 |
 |FLOWER-MACHINE   | DHCP if available |
+|FLOWER_ENDPOINT | 192.168.0.42 |
 |CAM-1 | 192.168.0.1 |
 |CAM-2 | 192.168.0.2 |
 |CAM-3 | 192.168.0.3 |
 |CAM-4 | 192.168.0.4 |
-|FLOWER_ENDPOINT | 192.168.0.42 |
 
 ## Configure WAN less setup
 
