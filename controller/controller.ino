@@ -91,9 +91,9 @@ EthernetServer server(80);
 
 // --- Calibration parameters ---
 // Raw ADC value when cylinder is fully retracted (0 mm)
-int calADC_0mm = 807;
+int calADC_0mm = 795;
 // Raw ADC value when cylinder is fully extended (1000 mm)
-int calADC_1000mm = 761;
+int calADC_1000mm = 741;
 
 // --- Cylinder parameters ---
 const float MAX_STROKE_MM = 1000.0;
