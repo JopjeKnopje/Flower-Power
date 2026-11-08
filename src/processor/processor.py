@@ -119,6 +119,9 @@ class PeopleCounter(Processor):
             self._old_values.append(pos)
             self._timer.start()
 
+    def update_count(self, count: int) -> None:
+        self.update_flower(count)
+
     @override
     def process(self, boxes: list[Vec4f]) -> None:
         # TODO: Maybe we do some smoothing here?
